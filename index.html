@@ -3,605 +3,509 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>🧊 Cube Defense · 后室煎熬版 PWA</title>
-  <meta name="theme-color" content="#0a2a1a">
+  <title>🧊 后室煎熬·无止尽坠落 | 实体塔防 恐怖PWA</title>
+  <meta name="theme-color" content="#0a0f1a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="manifest.json">
   <style>
-    :root { --bg:#0a2a1a; --panel:#4a2c14; --btn:#b87c4a; --gold:#f5b642; --coin:#ffaa33; --text:#ffdd77; --stock-bg:#1a1a2e; --stock-card:#16213e; --stock-red:#ff4757; --stock-green:#00d2d3; --stock-text:#e6f1ff; }
     * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
-    body { background:#0a2a1a; font-family:'Courier New',monospace; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:12px; background-image:radial-gradient(ellipse at center, #1a4a2a 0%, #0a1a0a 100%); }
-    #app { width:100%; max-width:1400px; background:#5c3e1f; border-radius:28px; padding:12px; box-shadow:0 12px 0 #2d1e0e; margin:auto; }
-    .canvas-wrapper { overflow:auto; border-radius:20px; background:#1a1a1a; max-height:62vh; border:3px solid #b87c4a; }
-    canvas { display:block; margin:0 auto; image-rendering:pixelated; background:#000; cursor:crosshair; }
-    .panel { display:flex; flex-wrap:wrap; gap:8px; background:#4a2c14; padding:10px; border-radius:24px; margin-bottom:8px; align-items:center; justify-content:space-between; box-shadow:0 4px 0 #2d1e0e; }
-    .sun,.coin { padding:6px 14px; border-radius:40px; font-size:13px; display:inline-flex; gap:8px; align-items:center; white-space:nowrap; box-shadow:inset 0 -3px 0 rgba(0,0,0,0.3); }
-    .sun { background:#f5b642; color:#3c280a; } .coin { background:#ffaa33; color:#3c280a; }
-    .btn { background:#b87c4a; border:none; color:#f9e2a1; padding:8px 14px; border-radius:40px; font-family:'Courier New',monospace; font-size:9px; cursor:pointer; box-shadow:0 4px 0 #4e2a10; transition:0.05s; white-space:nowrap; }
-    .btn:hover { background:#d88e4a; transform:translateY(-1px); }
-    .btn:active { transform:translateY(3px); box-shadow:0 1px 0 #4e2a10; }
-    .btn.sel { outline:3px solid #ffff66; background:#d88e4a; }
-    .upgrade-panel { background:#2c1a0c; border-radius:20px; padding:10px; margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
-    .upgrade-btn { background:#4a6c8c; font-size:8px; padding:5px 10px; box-shadow:0 3px 0 #2a4a6a; }
-    .login,.menu { text-align:center; color:#ffdd77; padding:30px 20px; }
-    .login-input { background:#2c1a0c; border:3px solid #b87c4a; border-radius:40px; padding:12px; margin:10px auto; width:280px; font-family:'Courier New',monospace; font-size:11px; color:#ffdd77; text-align:center; display:block; }
-    .error-msg { color:#ff6666; font-size:10px; }
-    .level-card { background:#4a2c14; border-radius:22px; padding:14px 8px; width:115px; text-align:center; cursor:pointer; margin:6px; display:inline-block; border:2px solid #6a4a2a; color:#ffdd77; }
-    .level-card:hover { background:#6a4a2a; border-color:#ffcc44; }
-    .level-card.locked { opacity:0.45; pointer-events:none; }
-    .levels-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:15px 0; max-height:420px; overflow-y:auto; padding:10px; background:rgba(0,0,0,0.25); border-radius:20px; }
-    .tip { font-size:8px; margin-top:10px; color:#eedd99; background:rgba(42,26,12,0.7); padding:8px; border-radius:30px; }
-    .disclaimer { font-size:7px; margin-top:14px; color:#ccccaa; background:rgba(0,0,0,0.45); padding:8px; border-radius:20px; line-height:1.4; }
-    .stock-disclaimer { font-size:7px; color:#ffaa44; background:rgba(255,100,0,0.15); border:1px solid #ff8844; padding:8px; border-radius:12px; margin-top:10px; line-height:1.5; }
-    #stockModule { background:var(--stock-bg); border-radius:20px; padding:15px; color:var(--stock-text); font-family:'Courier New',monospace; max-height:70vh; overflow-y:auto; border:2px solid #233554; }
-    .stock-grid { display:grid; grid-template-columns:1fr; gap:15px; margin-top:12px; }
-    @media(min-width:900px){ .stock-grid{grid-template-columns:1.5fr 1fr;} }
-    .stock-card { background:var(--stock-card); border-radius:12px; padding:12px; border:1px solid #233554; }
-    .stock-card h3 { font-size:10px; margin-bottom:8px; color:#ffcc66; }
-    .stock-table { width:100%; border-collapse:collapse; font-size:9px; }
-    .stock-table th,.stock-table td { padding:7px 5px; text-align:right; border-bottom:1px solid #233554; cursor:pointer; }
-    .stock-table td:first-child { text-align:left; font-weight:bold; }
-    .stock-table tr:hover td { background:rgba(255,255,255,0.05); }
-    .stock-table tr.sel-row td { background:rgba(255,200,60,0.15); outline:1px solid #ffaa33; }
-    .up { color:var(--stock-red); } .down { color:var(--stock-green); }
-    .trade-input { width:100%; padding:8px; margin-top:6px; background:#0f3460; border:1px solid #345888; color:white; border-radius:8px; font-size:11px; font-family:'Courier New',monospace; }
-    .trade-input:focus { border-color:#ffaa33; }
-    .btn-buy { background:var(--stock-red); box-shadow:0 3px 0 #aa2a3a; font-size:8px; padding:6px 10px; }
-    .btn-sell { background:var(--stock-green); box-shadow:0 3px 0 #008a8a; font-size:8px; padding:6px 10px; color:#0a1a1a; }
-    .btn-margin { background:#ff8844; box-shadow:0 3px 0 #aa5522; font-size:8px; padding:6px 10px; }
-    .btn-repay { background:#44aaff; box-shadow:0 3px 0 #2266aa; font-size:8px; padding:6px 10px; color:#0a1a1a; }
-    .position-item { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed #233554; font-size:8px; align-items:center; }
-    .asset-summary { display:flex; flex-wrap:wrap; gap:10px; background:#0f3460; padding:10px; border-radius:12px; margin-bottom:15px; justify-content:space-between; }
-    .asset-summary div { font-size:9px; }
-    .chart-container { margin-top:12px; background:#0a0f1a; border-radius:8px; padding:6px; border:1px solid #233554; }
-    canvas#equityChartCanvas { max-height:160px; width:100%; }
-    .lang-selector { display:inline-block; margin:10px; padding:6px 12px; background:#2c1a0c; border-radius:20px; color:#ffdd77; font-family:'Courier New',monospace; font-size:8px; }
-    select { background:#1a0a0a; color:#ffdd77; border:1px solid #b87c4a; padding:4px; font-size:8px; }
-    #horrorMsg { position:fixed; top:20%; left:50%; transform:translate(-50%,-50%); font-family:'Courier New',monospace; font-size:14px; color:#fff; text-shadow:0 0 10px red; pointer-events:none; z-index:200; opacity:0; transition:opacity 0.3s; }
+    body { background:#050a0a; font-family:'Courier New',monospace; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:12px; background-image:radial-gradient(circle at 30% 20%, #1a2a1a 0%, #030805 100%); overflow-x:hidden; }
+    #app { width:100%; max-width:1550px; background:#2e1c0c; border-radius:32px; padding:12px; box-shadow:0 20px 0 #1a0e05; margin:auto; border:1px solid #7a5a2a; }
+    .canvas-wrapper { overflow:auto; border-radius:20px; background:#000000; max-height:65vh; border:3px solid #9e6a3a; box-shadow:inset 0 0 30px rgba(0,0,0,0.8); }
+    canvas { display:block; margin:0 auto; image-rendering:pixelated; background:#010101; cursor:crosshair; filter: drop-shadow(0 0 2px #3a2a0a); }
+    .panel { display:flex; flex-wrap:wrap; gap:8px; background:#3a2416; padding:10px; border-radius:28px; margin-bottom:8px; align-items:center; justify-content:space-between; box-shadow:0 4px 0 #1f1208; border-bottom:2px solid #926e3a; }
+    .sun,.coin { padding:6px 14px; border-radius:40px; font-size:12px; display:inline-flex; gap:6px; align-items:center; background:#1f1a0c; color:#ffd966; border:1px solid #ccaa55; text-shadow:0 0 3px #ffaa33; }
+    .coin { background:#2a2410; }
+    .btn { background:#7a4a2a; border:none; color:#f9e2a1; padding:8px 14px; border-radius:40px; font-family:'Courier New',monospace; font-size:9px; font-weight:bold; cursor:pointer; box-shadow:0 4px 0 #3a220e; transition:0.05s linear; white-space:nowrap; letter-spacing:1px; }
+    .btn:active { transform:translateY(3px); box-shadow:0 1px 0 #3a220e; }
+    .btn.sel { outline:3px solid #ffaa44; background:#aa6a3a; box-shadow:0 0 8px #ffaa55; }
+    .upgrade-panel { background:#231b0e; border-radius:20px; padding:10px; margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; border:1px solid #6a4a2a; }
+    .upgrade-btn { background:#3a4e6a; font-size:8px; padding:6px 12px; box-shadow:0 2px 0 #1a2e4a; }
+    .login,.menu { text-align:center; color:#ffdd99; padding:30px 20px; background:rgba(0,0,0,0.45); border-radius:40px; backdrop-filter:blur(2px); }
+    .login-input { background:#1a1108; border:2px solid #b87c4a; border-radius:40px; padding:12px; margin:10px auto; width:280px; font-family:'Courier New',monospace; font-size:10px; color:#ffcc88; text-align:center; }
+    .level-card { background:#4a2a14; border-radius:22px; padding:12px 6px; width:115px; text-align:center; cursor:pointer; margin:6px; display:inline-block; border:2px solid #8a623a; color:#ffdd99; transition:0.1s; }
+    .level-card:hover { background:#7a4a2a; border-color:#ffcc66; transform:scale(0.98); }
+    .levels-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:15px 0; max-height:400px; overflow-y:auto; padding:10px; background:rgba(0,0,0,0.65); border-radius:20px; }
+    .tip { font-size:7px; margin-top:8px; color:#ccaa77; background:rgba(0,0,0,0.7); padding:6px 12px; border-radius:30px; border-left:3px solid #ff8844; }
+    .stock-panel { background:#0a0f1c; border-radius:20px; margin-top:15px; padding:12px; border:2px solid #aa6644; box-shadow:0 0 12px rgba(255,80,0,0.3); }
+    .horror-overlay { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:150; background:radial-gradient(circle, transparent 50%, rgba(0,0,0,0.6) 120%); opacity:0; transition:0.2s; }
+    .dread-text { position:fixed; bottom:15%; left:5%; background:#000000aa; color:#ffaa88; font-size:9px; padding:8px 15px; border-radius:30px; backdrop-filter:blur(4px); font-family:monospace; border-left:4px solid #ff4444; pointer-events:none; z-index:160; white-space:nowrap; animation: fadeDread 3s forwards; }
+    @keyframes fadeDread { 0%{opacity:0; transform:translateX(-20px);} 15%{opacity:1;} 80%{opacity:1;} 100%{opacity:0; transform:translateX(30px);} }
+    .sanity-warning { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(80,0,0,0.2); pointer-events:none; z-index:140; animation: pulseRed 1.2s infinite; }
+    @keyframes pulseRed { 0%{background:rgba(80,0,0,0);} 50%{background:rgba(120,20,0,0.2);} 100%{background:rgba(80,0,0,0);} }
+    #horrorMsg { position:fixed; top:22%; left:50%; transform:translate(-50%,-50%); font-size:14px; font-weight:bold; color:#ffbb99; text-shadow:0 0 12px red; background:#000000bb; padding:10px 24px; border-radius:60px; white-space:nowrap; z-index:200; opacity:0; transition:0.15s; border:1px solid #ff6644; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div id="app">
-  <div id="loginScreen">
-    <div class="login">
-      <h1 style="font-size:17px;">🧊 Cube Defense: Boss Rush</h1>
-      <p style="margin:18px 0 10px;font-size:9px;">600关·12种地形·模拟股市·后台运行</p>
-      <div class="lang-selector">
-        <label>🌐 语言 / Language:</label>
-        <select id="langSelect">
-          <option value="zh">中文</option>
-          <option value="en">English</option>
-        </select>
-      </div>
-      <input type="text" id="username" class="login-input" placeholder="玩家名称">
-      <button id="loginBtn" class="btn" style="font-size:11px;padding:10px 20px;">🚀 进入游戏</button>
-      <div id="loginError" class="error-msg"></div>
-      <div class="disclaimer">⚠️ 地形顺序：平原→山地→火山→沙漠→冰原→沼泽→森林→海洋→废墟→地底→天空→虚空 | 每关50波(约8分钟) | 昼夜渐变 | 后台运行不暂停</div>
-    </div>
-  </div>
-  <div id="menuScreen" style="display:none;">
-    <div class="menu">
-      <h1 style="font-size:17px;">🎮 主菜单 · 600关挑战</h1>
-      <div style="display:flex;gap:14px;justify-content:center;margin:22px 0;flex-wrap:wrap;">
-        <button id="startGameBtn" class="btn menu-btn">🧟 选择关卡</button>
-        <button id="openStockBtn" class="btn menu-btn">📈 模拟股市</button>
-        <button id="menuUpgradeBtn" class="btn menu-btn">⬆️ 植物升级</button>
-      </div>
-      <div id="levelsContainer" class="levels-grid" style="display:none;"></div>
-      <div id="menuUpgradePanel" class="upgrade-panel" style="display:none;"></div>
-      <div class="tip">💰 每关50波 | 波次间隔10秒 | 总时长约8分钟 | 行数9→45 | 主题每50关变换 | BOSS难度线性增长</div>
-      <div style="margin-top:10px;color:#ffdd77;font-size:9px;">🪙 游戏币: <span id="menuCurrency">0</span> | 🏆 已通关: <span id="menuCompleted">0</span>/600</div>
-    </div>
-  </div>
-  <div id="gameScreen" style="display:none;">
-    <div class="panel">
-      <div class="sun">☀️ <span id="sunAmount">150</span></div>
-      <div class="coin">🪙 <span id="currencyAmount">0</span></div>
-      <div class="btn-group" id="plantButtons">
-        <button class="btn sel" data-plant="Pea">🌱豌豆</button>
-        <button class="btn" data-plant="Snow">❄️寒冰</button>
-        <button class="btn" data-plant="Sun">🌻向日葵</button>
-        <button class="btn" data-plant="Nut">🥜坚果</button>
-        <button class="btn" data-plant="Pot">🪴花盆</button>
-        <button class="btn" data-plant="Potato">🥔土豆雷</button>
-        <button class="btn" data-plant="Cherry">🍒樱桃</button>
-        <button class="btn" data-plant="TallNut">🪵高坚果</button>
-      </div>
-      <button id="showUpgradeBtn" class="btn">⬆️升级</button>
-      <button id="manualExportBtn" class="btn">📦导出</button>
-    </div>
-    <div id="upgradePanel" class="upgrade-panel" style="display:none;">
-      <button class="btn upgrade-btn" data-upgrade="pea_damage">🌱伤害+1 (100🪙)</button>
-      <button class="btn upgrade-btn" data-upgrade="pea_speed">🌱攻速↑ (80🪙)</button>
-      <button class="btn upgrade-btn" data-upgrade="sun_value">🌻阳光+5 (120🪙)</button>
-      <button class="btn upgrade-btn" data-upgrade="nut_hp">🥜HP+3 (90🪙)</button>
-    </div>
-    <div class="canvas-wrapper"><canvas id="gameCanvas" width="800" height="1080"></canvas></div>
-    <div class="tip">⚡ 高速战斗 | 点击收集阳光 | 通关解锁下一关 | 后台不掉队</div>
-    <button id="backToMenuFromGame" class="btn" style="margin-top:8px;">🏠 返回主菜单</button>
-  </div>
-  <div id="stockModule" style="display:none;"></div>
+  <div id="loginScreen"><div class="login"><h1 style="font-size:18px;">⬛ 后室·无尽煎熬 ⬛</h1><p style="margin:12px 0 6px;">理智归零即是沦陷 | 实体低语 | 经济崩溃</p><p style="font-size:8px;">600层炼狱 · 12层恐惧变异</p><input type="text" id="username" class="login-input" placeholder="濒死流浪者姓名"><button id="loginBtn" class="btn" style="font-size:11px;">🔻 坠入后室 🔻</button><div id="loginError" class="error-msg"></div></div></div>
+  <div id="menuScreen" style="display:none;"><div class="menu"><h1>🎭 绝望主菜单 🎭</h1><div style="display:flex;gap:12px;justify-content:center;margin:18px 0;"><button id="startGameBtn" class="btn">🧠 选择层级(折磨)</button><button id="menuUpgradeBtn" class="btn">⬆️ 苟且强化</button><button id="stockTradeBtn" class="btn">📉 崩盘股市</button></div><div id="levelsContainer" class="levels-grid" style="display:none;"></div><div id="menuUpgradePanel" class="upgrade-panel" style="display:none;"></div><div id="stockMarketPanel" style="display:none;" class="stock-panel"></div><div class="tip">💀 理智持续腐蚀 · 低理智加速实体&减产 · 随机惨剧 · 杏仁水稀缺 · 连空气都在尖叫</div><div style="margin-top:12px;">🪙 痛苦币: <span id="menuCurrency">0</span> &nbsp;| 🏚️ 苟活层级: <span id="menuCompleted">0</span>/600</div></div></div>
+  <div id="gameScreen" style="display:none;"><div class="panel"><div class="sun">☀️ 残阳 <span id="sunAmount">150</span></div><div class="coin">🪙 折磨币 <span id="currencyAmount">0</span></div><div class="btn-group" id="plantButtons"><button class="btn sel" data-plant="Pea">🌱豌·萎靡</button><button class="btn" data-plant="Snow">❄️寒·冻伤</button><button class="btn" data-plant="Sun">🌻枯葵</button><button class="btn" data-plant="Nut">🥜腐朽坚果</button><button class="btn" data-plant="Pot">🪴裂痕花盆</button><button class="btn" data-plant="Potato">🥔瘿土豆雷</button><button class="btn" data-plant="Cherry">🍒血樱桃</button><button class="btn" data-plant="TallNut">🪵高耸墓碑</button></div><button id="showUpgradeBtn" class="btn">⬆️ 绝望升级</button></div><div id="upgradePanel" class="upgrade-panel" style="display:none;"></div><div class="canvas-wrapper"><canvas id="gameCanvas" width="800" height="1080"></canvas></div><div class="tip">⚡ 理智越低阳光减产&僵尸亢奋 | 杏仁水💧延缓疯狂 | 花盆增加植物抗性 | 后室低语萦绕</div><button id="backToMenuBtn" class="btn" style="margin-top:8px;">🏠 逃回大厅(暂时)</button></div>
 </div>
 <div id="horrorMsg"></div>
-
+<div id="globalOverlay" class="horror-overlay"></div>
 <script>
-(function() {
-    // ======================= 多语言支持 =======================
-    const translations = {
-      zh: {
-        game_title:"🧊 Cube Defense: Boss Rush", login_subtitle:"600关·12种地形·模拟股市·后台运行",
-        username_placeholder:"玩家名称", enter_game:"🚀 进入游戏",
-        login_disclaimer:"⚠️ 地形顺序：平原→山地→火山→沙漠→冰原→沼泽→森林→海洋→废墟→地底→天空→虚空 | 每关50波(约8分钟) | 昼夜渐变 | 后台运行不暂停",
-        menu_title:"🎮 主菜单 · 600关挑战", select_level:"🧟 选择关卡", stock_market:"📈 模拟股市", plant_upgrade:"⬆️ 植物升级",
-        menu_tip:"💰 每关50波 | 波次间隔10秒 | 总时长约8分钟 | 行数9→45 | 主题每50关变换 | BOSS难度线性增长",
-        currency_label:"游戏币", completed_label:"已通关",
-        plant_pea:"豌豆", plant_snow:"寒冰", plant_sun:"向日葵", plant_nut:"坚果", plant_pot:"花盆", plant_potato:"土豆雷", plant_cherry:"樱桃", plant_tallnut:"高坚果",
-        upgrade_btn:"⬆️升级", export_btn:"📦导出", upgrade_damage:"伤害+1", upgrade_speed:"攻速↑", upgrade_sun:"阳光+5", upgrade_hp:"HP+3",
-        game_tip:"⚡ 高速战斗 | 点击收集阳光 | 通关解锁下一关 | 后台不掉队", back_menu:"🏠 返回主菜单", language_label:"🌐 语言 / Language:",
-        stock_title:"📈 模拟股市 · 仅供娱乐",
-        stock_disclaimer:"⚠️ 免责声明：本股市模块为纯模拟娱乐功能，所有股票价格均为随机生成，与真实市场行情无关。不构成任何投资建议，请勿用于实际投资决策。",
-        cash:"现金", stock_value:"股票市值", total_asset:"总资产", debt:"融资债务", stock_list:"模拟A股 (点击选中)", position_list:"持仓列表",
-        margin_trade:"融资融券", borrow:"借入", repay:"偿还", interest_rate:"利率", buy:"买入", sell:"卖出", quantity:"股数", amount:"金额", no_position:"暂无持仓",
-        back_to_menu:"🏠 返回菜单", victory:"🎉 通关！关卡{}完成！{}", victory_again:"✅ 关卡{}再次通关！{}", defeat:"💀 游戏失败！僵尸突破了防线。{}",
-        insufficient_cash:"❌ 现金不足！需要{}🪙", insufficient_holdings:"❌ 持仓不足！持有{}股", borrow_limit:"单次借款上限50000🪙",
-        invalid_amount:"请输入有效金额", select_stock:"请先在表格中选择一只股票", level_card:"关卡 {}", rows_format:"{}行"
-      },
-      en: {
-        game_title:"🧊 Cube Defense: Boss Rush", login_subtitle:"600 Lvls · 12 Terrains · Sim Stocks · Background Run",
-        username_placeholder:"Player Name", enter_game:"🚀 Enter Game",
-        login_disclaimer:"⚠️ Terrain order: Plains→Mountains→Volcano→Desert→Ice→Swamp→Forest→Ocean→Ruins→Underground→Sky→Void | 50 waves/lvl (~8min) | Day/night cycle | Background run",
-        menu_title:"🎮 Main Menu · 600 Levels", select_level:"🧟 Select Level", stock_market:"📈 Sim Stocks", plant_upgrade:"⬆️ Upgrade Plants",
-        menu_tip:"💰 50 waves/lvl | 10s per wave | ~8min total | Rows 9→45 | Theme changes every 50 lvls | Boss scales linearly",
-        currency_label:"Coins", completed_label:"Cleared",
-        plant_pea:"Pea", plant_snow:"Ice", plant_sun:"Sunflower", plant_nut:"Nut", plant_pot:"Pot", plant_potato:"Potato Mine", plant_cherry:"Cherry Bomb", plant_tallnut:"Tall-nut",
-        upgrade_btn:"⬆️Upgrade", export_btn:"📦Export", upgrade_damage:"DMG+1", upgrade_speed:"SPD↑", upgrade_sun:"Sun+5", upgrade_hp:"HP+3",
-        game_tip:"⚡ Fast battle | Click to collect sun | Clear to unlock next | Background safe", back_menu:"🏠 Back to Menu", language_label:"🌐 Language / 语言:",
-        stock_title:"📈 Sim Stock Market · Entertainment Only",
-        stock_disclaimer:"⚠️ Disclaimer: This is a simulated entertainment module. All stock prices are randomly generated and have no connection to real markets. This does not constitute investment advice.",
-        cash:"Cash", stock_value:"Stock Value", total_asset:"Total Asset", debt:"Margin Debt", stock_list:"Sim A-Share (Click to select)", position_list:"Positions",
-        margin_trade:"Margin Trading", borrow:"Borrow", repay:"Repay", interest_rate:"Interest rate", buy:"Buy", sell:"Sell", quantity:"Qty", amount:"Amount", no_position:"No positions",
-        back_to_menu:"🏠 Back to Menu", victory:"🎉 Victory! Level {} cleared! {}", victory_again:"✅ Level {} cleared again! {}", defeat:"💀 Defeat! Zombies broke through. {}",
-        insufficient_cash:"❌ Not enough cash! Need {}🪙", insufficient_holdings:"❌ Not enough shares! Holding {}", borrow_limit:"Max borrow 50000🪙",
-        invalid_amount:"Enter a valid amount", select_stock:"Please select a stock first", level_card:"Level {}", rows_format:"{} rows"
+(function(){
+  // ---------- 极致煎熬参数 ----------
+  let globalCurrency = 0;
+  let plantUpgrades = { pea_damage:0, pea_speed:0, sun_value:0, nut_hp:0, bomb_damage:0 };
+  let currentGameUser = null, currentLevel = 1, completedLevels = 0, gameState = "MENU";
+  let updateInterval = null, animFrameId = null, selectedPlant = "Pea";
+  let ROWS = 9, COLS = 8, CELL_W = 100, CELL_H = 120, sun = 150, wave = 1, bossesDefeated = 0;
+  let grid = [], terrain = [], zombies = [], bullets = [], sunDrops = [], almondWaters = [];
+  let lastWaveTime = 0, lastSpawnTime = 0, lastGameUpdate = 0, logicAcc = 0;
+  const TOTAL_LEVELS = 600, WIN_WAVE = 50, FIXED_STEP = 33;
+  let sanity = 100, MAX_SANITY = 100, insanityFlag = false, dreadAcc = 0, lastDreadMsgTime = 0;
+  let terrorShake = 0;          // 屏幕震动强度
+  let lowSanityOverlay = 0;
+  
+  // 折磨文本池
+  const DREAD_QUOTES = [
+    "墙壁渗出粘液...", "远处传来咀嚼声", "你感觉被凝视", "理智的纤维断裂", "空气变得冰冷", "有什么东西在身后", "杏仁水越来越腥", "灯光闪烁 忽明忽暗", 
+    "实体磨牙的声音", "你忘记来时的路", "后室在生长", "恐惧具象化", "时间流速诡异", "尸体在窃笑", "植物也在颤抖", "死亡在指缝间流逝"
+  ];
+  
+  // 后室实体库 (更压抑)
+  const ENTITIES = {
+    Smiler:{ hp:3, speed:2.9, color:"#ffaa66", special:"fear", reward:35, name:"笑魇" },
+    Hound:{ hp:2, speed:3.4, color:"#886666", special:"rush", reward:28, name:"猎犬" },
+    Partygoer:{ hp:7, speed:1.2, color:"#ff8844", special:"convert", reward:65, name:"派对客" },
+    Normal:{ hp:4, speed:1.6, color:"#b87c4a", reward:18, name:"沦丧者" },
+    Creeper:{ hp:6, speed:1.4, color:"#6f8a4a", reward:22, name:"匍匐变体" },
+    Giant:{ hp:18, speed:0.95, color:"#cf6f3a", reward:95, name:"巨像残骸" }
+  };
+  
+  const $ = id => document.getElementById(id);
+  const canvas = $('gameCanvas'), ctx = canvas.getContext('2d');
+  let flashTimer;
+  function flashMsg(text,color,dur){ let el=$('horrorMsg'); el.textContent=text; el.style.color=color; el.style.opacity='1'; clearTimeout(flashTimer); flashTimer=setTimeout(()=>el.style.opacity='0',dur); }
+  
+  // 后室主题 (加深绝望感)
+  const THEMES = [
+    {name:"Level 0 - 腐臭大厅",grass:"#b38f5a",w:0.09,r:0.05,m:0.06,despair:"回响不断"},
+    {name:"Level 1 - 仓储深渊",grass:"#6a5a4a",w:0.03,r:0.17,m:0.05,despair:"货架阴影"},
+    {name:"Level 2 - 喉管管道",grass:"#4a4a3a",w:0.01,r:0.18,m:0.07,despair:"金属锈味"},
+    {name:"Level 3 - 废弃电站",grass:"#5a5a3a",w:0.02,r:0.15,m:0.09,despair:"嗡鸣不止"},
+    {name:"Level 4 - 荒芜办公室",grass:"#c9b07a",w:0.04,r:0.09,m:0.04,despair:"文件腐烂"},
+    {name:"Level 5 - 无尽旅馆",grass:"#7a5a4a",w:0.16,r:0.06,m:0.22,despair:"走廊无限"},
+    {name:"Level 6 - 黑暗子宮",grass:"#2c2c2c",w:0.09,r:0.04,m:0.12,despair:"绝对黑暗"},
+    {name:"Level 7 - 深海溺亡",grass:"#2a4a6a",w:0.35,r:0.05,m:0.03,despair:"窒息感"},
+    {name:"Level 8 - 崩塌废墟",grass:"#6a5a4a",w:0.02,r:0.28,m:0.12,despair:"碎石埋骨"},
+    {name:"Level 9 - 死寂郊区",grass:"#5a7a3a",w:0.03,r:0.23,m:0.10,despair:"无人的家"},
+    {name:"Level 10 - 枯萎田野",grass:"#8a7a4a",w:0.02,r:0.03,m:0.03,despair:"稻草人眨眼"},
+    {name:"Level 11 - 无尽哀城",grass:"#4a3a5a",w:0.06,r:0.17,m:0.07,despair:"万人低语"}
+  ];
+  function getTheme(lv){ return THEMES[Math.min(Math.floor((lv-1)/50),11)]; }
+  function getRows(lv){ return Math.min(42,9+Math.floor((lv-1)*33/599)); }
+  
+  // 存档/股票 (更加痛苦的经济)
+  let stockData = { holdings: {}, prices: {}, history: [], crashCooldown:0 };
+  const STOCKS = ["后室废土股", "杏仁水黑市", "笑魇恐惧基金", "派对客传销"];
+  function saveGame(){
+    if(!currentGameUser)return;
+    let save = { currency:globalCurrency, upgrades:plantUpgrades, completed:completedLevels, stockHoldings:stockData.holdings, stockPrices:stockData.prices };
+    localStorage.setItem('cdbr_'+currentGameUser, JSON.stringify(save));
+  }
+  function loadGame(){
+    if(!currentGameUser)return;
+    let d = localStorage.getItem('cdbr_'+currentGameUser);
+    if(d){
+      let data = JSON.parse(d);
+      globalCurrency = data.currency || 0;
+      plantUpgrades = data.upgrades || {pea_damage:0,pea_speed:0,sun_value:0,nut_hp:0,bomb_damage:0};
+      completedLevels = data.completed || 0;
+      stockData.holdings = data.stockHoldings || {};
+      stockData.prices = data.stockPrices || {};
+    }
+    if(Object.keys(stockData.prices).length===0) STOCKS.forEach(s=> stockData.prices[s]=45+Math.random()*50);
+    updateUI();
+  }
+  function updateUI(){ 
+    $('currencyAmount').innerText = Math.floor(globalCurrency);
+    if($('menuCurrency')) $('menuCurrency').innerText = Math.floor(globalCurrency);
+    if($('menuCompleted')) $('menuCompleted').innerText = completedLevels;
+  }
+  
+  // 地形生成
+  function genTerrain(lv,rows){
+    let t = Array(rows).fill().map(()=>Array(COLS).fill('grass'));
+    let th = getTheme(lv);
+    for(let r=0;r<rows;r++) for(let c=0;c<COLS;c++){
+      let rand=Math.random(), cum=0;
+      cum+=th.w; if(rand<cum){t[r][c]='water';continue;}
+      cum+=th.r; if(rand<cum){t[r][c]='rock';continue;}
+      cum+=th.m; if(rand<cum){t[r][c]='mud';continue;}
+    }
+    return t;
+  }
+  
+  // 理智煎熬系统 + 影响游戏难度
+  function updateSanityWithAgony(dt){
+    let decay = 0.014 * dt;
+    let theme = getTheme(currentLevel);
+    if(theme.name.includes("黑暗")) decay*=2.0;
+    if(theme.name.includes("溺亡")) decay*=1.7;
+    sanity = Math.max(0, sanity - decay);
+    // 理智极低时额外惩罚
+    if(sanity<25 && !insanityFlag && Math.random()<0.003*dt) triggerHorrorEvent(true);
+    if(sanity<=0 && !insanityFlag) triggerInsanityDeath();
+    // 产生低语文本 (更加压抑)
+    if(Date.now() - lastDreadMsgTime > 8000 && sanity<70 && Math.random()<0.2){
+      let msg = DREAD_QUOTES[Math.floor(Math.random()*DREAD_QUOTES.length)];
+      showDreadText(msg);
+      lastDreadMsgTime = Date.now();
+    }
+  }
+  function showDreadText(msg){
+    let div = document.createElement('div'); div.className='dread-text'; div.innerText=`⚠️ ${msg} ⚠️`; document.body.appendChild(div);
+    setTimeout(()=>div.remove(), 3200);
+  }
+  function triggerHorrorEvent(strong=false){
+    let r = Math.random();
+    if(strong || r<0.4){
+      terrorShake = 12;
+      flashMsg("⚡ 后室恶意具现 ⚡","#ff6666",900);
+      if(Math.random()<0.5){ // 阳光瞬间减少
+        sun = Math.max(30, sun-35);
+        $('sunAmount').innerText = Math.floor(sun);
+        showDreadText("阳光被吞噬...");
+      } else { // 随机一个植物枯萎
+        let possible=[];
+        for(let i=0;i<ROWS;i++) for(let j=0;j<COLS;j++) if(grid[i][j]) possible.push([i,j]);
+        if(possible.length){ let [r2,c2]=possible[Math.floor(Math.random()*possible.length)]; grid[r2][c2]=null; flashMsg("🌿 植物被恐惧碾碎","#ff8888",700); }
       }
-    };
-
-    let currentLang = 'zh';
-    function setLanguage(lang) {
-      if (!translations[lang]) return;
-      currentLang = lang;
-      localStorage.setItem('cdbr_lang', lang);
-      applyLanguage(lang);
-      if (menuScreen.style.display !== 'none') { renderMenuUpgradePanel(); }
-      if (stockModule.style.display !== 'none') { initStockModule(); }
-      if (levelsContainer.style.display !== 'none') { renderLevelList(); }
-    }
-    function applyLanguage(lang) {
-      const t = translations[lang];
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (t[key]) {
-          el.childNodes.forEach(node => { if (node.nodeType === 3) node.textContent = t[key]; });
-          if (el.children.length === 0) el.innerText = t[key];
-        }
-      });
-      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.getAttribute('data-i18n-placeholder');
-        if (t[key]) el.placeholder = t[key];
-      });
-      document.title = t.game_title || "Cube Defense";
-    }
-
-    document.getElementById('langSelect').addEventListener('change', function(e) { setLanguage(e.target.value); });
-    const savedLang = localStorage.getItem('cdbr_lang');
-    if (savedLang && translations[savedLang]) {
-      currentLang = savedLang;
-      document.getElementById('langSelect').value = savedLang;
     } else {
-      const browserLang = navigator.language.split('-')[0];
-      if (translations[browserLang]) {
-        currentLang = browserLang;
-        document.getElementById('langSelect').value = browserLang;
+      showDreadText("👁️ 你感觉到有东西在注视你");
+      sanity = Math.max(0, sanity-7);
+    }
+  }
+  function triggerInsanityDeath(){
+    if(insanityFlag) return;
+    insanityFlag=true;
+    flashMsg("💀 理智彻底崩溃 · 实体从四面八方涌入 💀","#ff0000",2800);
+    for(let i=0;i<12;i++) zombies.push({ x:COLS*CELL_W+Math.random()*400, row:Math.floor(Math.random()*ROWS), hp:1, maxHp:1, type:"幻影", color:"rgba(200,0,0,0.6)", speed:0.7, baseSpeed:0.7, isFake:true, reward:0 });
+    setTimeout(()=> gameOver(false), 5000);
+  }
+  
+  // 僵尸速度受理智影响 (愈发煎熬)
+  function getSpeedMultiplierBySanity(){ return 1 + ( (MAX_SANITY - Math.max(10,sanity)) / MAX_SANITY ) * 0.65; }
+  
+  // 核心战斗逻辑 (改压力)
+  function updateGameSim(dt){
+    let sanityMult = getSpeedMultiplierBySanity();
+    // 植物逻辑
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      let p = grid[r][c]; if(!p) continue;
+      let plant = p.type==="Pot" && p.underPlant ? p.underPlant : p;
+      if(plant.cd>0) plant.cd-=dt;
+      if(plant.sunTimer>0) plant.sunTimer-=dt;
+      if(plant.fuse>0) plant.fuse-=dt;
+      // 向日葵产量受理智影响 (绝望减产)
+      let sanityYieldFactor = Math.max(0.3, sanity/100);
+      if(plant.type==="Sun" && plant.sunTimer<=0){
+        let gain = Math.floor((25 + plantUpgrades.sun_value*5) * sanityYieldFactor);
+        sun += Math.max(8, gain);
+        sunDrops.push({x:c*CELL_W+50,y:r*CELL_H+20,life:55});
+        plant.sunTimer = 180;
       }
-    }
-    setTimeout(() => applyLanguage(currentLang), 0);
-
-    function t(key, ...args) {
-      let str = translations[currentLang][key] || translations.zh[key] || key;
-      args.forEach((arg, i) => { str = str.replace('{}', arg); });
-      return str;
-    }
-
-    // ======================= 全局状态 =======================
-    let globalCurrency = 0;
-    let plantUpgrades = { pea_damage: 0, pea_speed: 0, sun_value: 0, nut_hp: 0 };
-    let currentGameUser = null;
-    let currentLevel = 1;
-    let completedLevels = 0;
-    let gameState = "MENU";
-    let updateInterval = null;
-    let animFrameId = null;
-    let selectedPlant = "Pea";
-    let ROWS = 9;
-    let CELL_W = 100;
-    let CELL_H = 120;
-    let sun = 150;
-    let wave = 1;
-    let bossesDefeatedInLevel = 0;
-    let gameLog = [];
-    let grid = [];
-    let terrain = [];
-    let zombies = [];
-    let bullets = [];
-    let sunDrops = [];
-    let screenShake = [];
-    let lastWaveTime = 0;
-    let lastZombieSpawnTime = 0;
-    let lastGameUpdate = 0;
-    let logicAccumulator = 0;
-    const TOTAL_LEVELS = 600;
-    const WIN_WAVE = 50;
-    const COLS = 8;
-    const FIXED_STEP = 33;
-
-    const $ = (id) => document.getElementById(id);
-    const loginScreen = $('loginScreen');
-    const menuScreen = $('menuScreen');
-    const gameScreen = $('gameScreen');
-    const stockModule = $('stockModule');
-    const gameCanvas = $('gameCanvas');
-    const ctx = gameCanvas.getContext('2d');
-    const sunAmountEl = $('sunAmount');
-    const currencyAmountEl = $('currencyAmount');
-    const loginErrorEl = $('loginError');
-    const levelsContainer = $('levelsContainer');
-    const upgradePanel = $('upgradePanel');
-    const menuUpgradePanel = $('menuUpgradePanel');
-    const menuCurrencyEl = $('menuCurrency');
-    const menuCompletedEl = $('menuCompleted');
-
-    function saveCurrencyAndUpgrades() {
-      if(!currentGameUser) return;
-      try { localStorage.setItem(`cdbr_currency_${currentGameUser}`, JSON.stringify({ currency: globalCurrency, upgrades: plantUpgrades })); } catch(e) {}
-    }
-    function loadCurrencyAndUpgrades() {
-      if(!currentGameUser) return;
-      try {
-        let raw = localStorage.getItem(`cdbr_currency_${currentGameUser}`);
-        if(raw) { let data = JSON.parse(raw); globalCurrency = data.currency || 0; plantUpgrades = data.upgrades || { pea_damage:0, pea_speed:0, sun_value:0, nut_hp:0 }; }
-        else { globalCurrency = 0; plantUpgrades = { pea_damage:0, pea_speed:0, sun_value:0, nut_hp:0 }; }
-      } catch(e) {}
-      updateCurrencyDisplay();
-    }
-    function saveGameLocal() {
-      if(!currentGameUser) return;
-      try { localStorage.setItem(`cdbr_save_${currentGameUser}`, JSON.stringify({ wave, sun, currentLevel, completedLevels, bossesDefeatedInLevel })); } catch(e) {}
-    }
-    function loadGameLocal() {
-      if(!currentGameUser) return;
-      try { let raw = localStorage.getItem(`cdbr_save_${currentGameUser}`); if(raw) { let s = JSON.parse(raw); wave = s.wave||1; sun = s.sun||150; currentLevel = s.currentLevel||1; completedLevels = s.completedLevels||0; bossesDefeatedInLevel = s.bossesDefeatedInLevel||0; } } catch(e) {}
-    }
-    function updateCurrencyDisplay() {
-      if(currencyAmountEl) currencyAmountEl.innerText = Math.floor(globalCurrency);
-      if(menuCurrencyEl) menuCurrencyEl.innerText = Math.floor(globalCurrency);
-      if(menuCompletedEl) menuCompletedEl.innerText = completedLevels;
-    }
-    function addCurrency(amount) { globalCurrency += amount; updateCurrencyDisplay(); saveCurrencyAndUpgrades(); }
-    function spendCurrency(amount) { if(globalCurrency >= amount) { globalCurrency -= amount; updateCurrencyDisplay(); saveCurrencyAndUpgrades(); return true; } return false; }
-    function convertSunToCurrency(sunAmt) { let coinGain = Math.floor(sunAmt / 10); if(coinGain > 0) { addCurrency(coinGain); return coinGain; } return 0; }
-    function applyUpgrade(id, cost) {
-      if(spendCurrency(cost)) {
-        if(id==='pea_damage') plantUpgrades.pea_damage++;
-        else if(id==='pea_speed') plantUpgrades.pea_speed++;
-        else if(id==='sun_value') plantUpgrades.sun_value++;
-        else if(id==='nut_hp') plantUpgrades.nut_hp++;
-        saveCurrencyAndUpgrades(); return true;
-      } return false;
-    }
-
-    // ======================= 地形主题 =======================
-    function getRowsForLevel(level) { return Math.min(45, 9 + Math.floor((level-1)*36/599)); }
-    const THEMES = [
-      { name:"平原", mainGrass:"#6b8e23", altColor1:"#8fbc6e", altColor2:"#4a5d23", waterProb:0.08, lavaProb:0, rockProb:0.04, mudProb:0.04, iceProb:0, mountainProb:0 },
-      { name:"山地", mainGrass:"#8b8b7a", altColor1:"#a8a894", altColor2:"#5a5a4a", waterProb:0.02, lavaProb:0, rockProb:0.15, mudProb:0.02, iceProb:0, mountainProb:0.60 },
-      { name:"火山", mainGrass:"#8a3a2a", altColor1:"#aa5a3a", altColor2:"#cc6633", waterProb:0, lavaProb:0.20, rockProb:0.15, mudProb:0.04, iceProb:0, mountainProb:0 },
-      { name:"沙漠", mainGrass:"#e8c96e", altColor1:"#d4a34a", altColor2:"#b87c2a", waterProb:0.02, lavaProb:0.03, rockProb:0.12, mudProb:0.08, iceProb:0, mountainProb:0 },
-      { name:"冰原", mainGrass:"#aad4ff", altColor1:"#7bb3db", altColor2:"#4a8cbc", waterProb:0.03, lavaProb:0, rockProb:0.08, mudProb:0.02, iceProb:0.25, mountainProb:0 },
-      { name:"沼泽", mainGrass:"#6a8a4a", altColor1:"#4a6a2a", altColor2:"#2a4a1a", waterProb:0.15, lavaProb:0, rockProb:0.05, mudProb:0.20, iceProb:0, mountainProb:0 },
-      { name:"森林", mainGrass:"#3c7840", altColor1:"#2a5a2e", altColor2:"#1a3e1e", waterProb:0.08, lavaProb:0, rockProb:0.03, mudProb:0.10, iceProb:0, mountainProb:0 },
-      { name:"海洋", mainGrass:"#2a6a8c", altColor1:"#1a4a6a", altColor2:"#0a2a4a", waterProb:0.30, lavaProb:0, rockProb:0.05, mudProb:0.02, iceProb:0, mountainProb:0 },
-      { name:"废墟", mainGrass:"#7a6a5a", altColor1:"#5a4a3a", altColor2:"#3a2a1a", waterProb:0.02, lavaProb:0.04, rockProb:0.25, mudProb:0.10, iceProb:0, mountainProb:0 },
-      { name:"地底", mainGrass:"#4a3a2a", altColor1:"#6a4a3a", altColor2:"#2a1a0a", waterProb:0.02, lavaProb:0.12, rockProb:0.22, mudProb:0.08, iceProb:0, mountainProb:0 },
-      { name:"天空", mainGrass:"#aaccff", altColor1:"#88aaee", altColor2:"#6688cc", waterProb:0.02, lavaProb:0, rockProb:0.02, mudProb:0.02, iceProb:0.10, mountainProb:0 },
-      { name:"虚空", mainGrass:"#4a3a6a", altColor1:"#6a4a8a", altColor2:"#8a5aaa", waterProb:0.05, lavaProb:0.05, rockProb:0.15, mudProb:0.05, iceProb:0.08, mountainProb:0 }
-    ];
-    function getThemeForLevel(level) { let idx = Math.min(Math.floor((level-1)/50), THEMES.length-1); return THEMES[idx]; }
-    function getDaylightTint(level) {
-      let progress = Math.min(1, Math.max(0, (level-1)/TOTAL_LEVELS)), alpha = 0.05 + progress * 0.30, r,g,b;
-      if(progress < 0.4) { let t = progress/0.4; r = 255 - 40*t; g = 240 - 50*t; b = 200 - 70*t; }
-      else if(progress < 0.7) { let t = (progress-0.4)/0.3; r = 215 - 100*t; g = 190 - 110*t; b = 130 - 80*t; }
-      else { let t = (progress-0.7)/0.3; r = 115 - 85*t; g = 80 - 60*t; b = 50 - 35*t; }
-      r = Math.max(0, Math.floor(r)); g = Math.max(0, Math.floor(g)); b = Math.max(0, Math.floor(b));
-      return `rgba(${r},${g},${b},${alpha.toFixed(3)})`;
-    }
-    function generateComplexTerrain(level, rows) {
-      let theme = getThemeForLevel(level), t = Array(rows).fill().map(()=>Array(COLS).fill('grass'));
-      for(let r=0; r<rows; r++) for(let c=0; c<COLS; c++) {
-        let rand = Math.random(), cum = 0;
-        cum += theme.waterProb; if(rand < cum) { t[r][c]='water'; continue; }
-        cum += theme.lavaProb; if(rand < cum) { t[r][c]='lava'; continue; }
-        cum += theme.rockProb; if(rand < cum) { t[r][c]='rock'; continue; }
-        cum += theme.mudProb; if(rand < cum) { t[r][c]='mud'; continue; }
-        cum += theme.iceProb; if(rand < cum) { t[r][c]='ice'; continue; }
-        cum += theme.mountainProb; if(rand < cum) { t[r][c]='mountain'; }
+      let hasZombie = zombies.some(z=>z.row===r && z.x<COLS*CELL_W);
+      if(hasZombie && plant.type==="Pea" && plant.cd<=0){
+        bullets.push({x:c*CELL_W+70,y:r*CELL_H+55,row:r,type:"pea",dmg:1+plantUpgrades.pea_damage});
+        plant.cd = Math.max(9, 20 - plantUpgrades.pea_speed*2);
+      }else if(hasZombie && plant.type==="Snow" && plant.cd<=0){
+        bullets.push({x:c*CELL_W+70,y:r*CELL_H+55,row:r,type:"ice",dmg:1});
+        plant.cd = 24;
       }
-      return t;
-    }
-
-    // ======================= BOSS系统 =======================
-    function generateBossForLevel(level, index) {
-      const namePool = ["虚空领主","熔核巨兽","冰霜巨龙","混沌魔像","末日使者","风暴女王","大地泰坦","暗影刺客"];
-      let difficulty = level/50, baseHp = 20 + Math.floor(level*1.5) + index*8, baseSpeed = 0.7 + (level*0.007), reward = 300 + level*20 + index*60;
-      return { name:`${namePool[index%namePool.length]} Lv.${level}`, hp:Math.floor(baseHp*(1+difficulty*0.2)), speed:Math.min(1.25, baseSpeed), color:`hsl(${(level*15+index*40)%360},70%,50%)`, reward };
-    }
-    function getEnhancedBosses(level) { return Array(5).fill().map((_,i)=>enhanceBoss(generateBossForLevel(level,i),level)); }
-    function enhanceBoss(boss, level) { return { ...boss, hp:Math.floor(boss.hp*1.35), speed:boss.speed*1.06, attackBonus:1, reward:boss.reward+180 }; }
-
-    const PLANT_COST = { Pea:50, Snow:75, Sun:50, Nut:75, Pot:50, Potato:25, Cherry:150, TallNut:125 };
-    const PLANT_HP = { Pea:3, Snow:3, Sun:3, Nut:6, Pot:5, Potato:1, Cherry:1, TallNut:12 };
-    const ZOMBIE_TYPES = { Normal:{hp:3,speed:1.6,color:"#c0a080"}, Creeper:{hp:4,speed:1.5,color:"#2d7d2d"}, Enderman:{hp:3,speed:2.4,color:"#1a1a1a"}, Digger:{hp:3,speed:1.7,color:"#996633"}, Giant:{hp:8,speed:1.0,color:"#6b4c3c"} };
-
-    // ======================= 游戏核心 =======================
-    function startLevel(level) {
-      if(level > TOTAL_LEVELS) { alert("🏆 恭喜！你已完成全部600关！"); showMenu(); return; }
-      if(updateInterval) clearInterval(updateInterval);
-      if(animFrameId) cancelAnimationFrame(animFrameId);
-      currentLevel = level; ROWS = getRowsForLevel(level); CELL_H = ROWS <= 18 ? 120 : ROWS <= 30 ? 95 : 72;
-      gameCanvas.height = ROWS * CELL_H; gameCanvas.width = COLS * CELL_W;
-      wave = 1; sun = 150; bossesDefeatedInLevel = 0;
-      terrain = generateComplexTerrain(level, ROWS); grid = Array(ROWS).fill().map(()=>Array(COLS).fill(null));
-      zombies = []; bullets = []; sunDrops = []; screenShake = Array(ROWS).fill(0);
-      logicAccumulator = 0; sunAmountEl.innerText = sun; updateCurrencyDisplay();
-      gameScreen.style.display = "block"; stockModule.style.display = "none"; menuScreen.style.display = "none";
-      gameState = "PLAYING";
-      let now = performance.now(); lastWaveTime = now; lastZombieSpawnTime = now; lastGameUpdate = now;
-      function renderLoop() { if(gameState==="PLAYING") draw(); animFrameId = requestAnimationFrame(renderLoop); }
-      renderLoop();
-      updateInterval = setInterval(() => {
-        if (gameState !== "PLAYING") return;
-        const nowTime = performance.now(); let delta = Math.min(nowTime - lastGameUpdate, 2000);
-        logicAccumulator += delta; lastGameUpdate = nowTime;
-        while (logicAccumulator >= FIXED_STEP) {
-          if (nowTime - lastWaveTime >= 10000) { wave++; lastWaveTime += 10000; if (wave > WIN_WAVE) wave = WIN_WAVE; }
-          let spawnInterval = Math.max(350, 1500 - Math.floor(currentLevel*1.1) - Math.floor(wave/4));
-          if (nowTime - lastZombieSpawnTime >= spawnInterval && zombies.filter(z=>!z.isBoss).length < 16 && !zombies.some(z=>z.isBoss)) {
-            let types = ["Normal","Creeper","Enderman","Digger"]; if(wave>=15) types.push("Giant");
-            let type = types[Math.floor(Math.random()*types.length)], base = ZOMBIE_TYPES[type];
-            zombies.push({ x:COLS*CELL_W, row:Math.floor(Math.random()*ROWS), hp:base.hp+Math.floor(currentLevel/4), maxHp:base.hp+Math.floor(currentLevel/4), type, baseSpeed:base.speed*(1+Math.min(0.55,(currentLevel-1)*0.018)), speed:base.speed*(1+Math.min(0.55,(currentLevel-1)*0.018)), walkPhase:Math.random()*100, slowTimer:0, attackCd:0, color:base.color, isBoss:false });
-            lastZombieSpawnTime = nowTime;
-          }
-          let bossWaveMap = [10,20,30,40,50];
-          if(bossesDefeatedInLevel<5 && wave>=bossWaveMap[bossesDefeatedInLevel] && !zombies.some(z=>z.isBoss)) {
-            let bossData = getEnhancedBosses(currentLevel)[bossesDefeatedInLevel], row = Math.floor(Math.random() * ROWS);
-            zombies.push({ x:COLS*CELL_W, row, hp:bossData.hp, maxHp:bossData.hp, type:"BOSS", name:bossData.name, color:bossData.color, isBoss:true, baseSpeed:bossData.speed, speed:bossData.speed, walkPhase:Math.random()*100, slowTimer:0, attackCd:0, reward:bossData.reward, attackBonus:1 });
-          }
-          if(wave>=WIN_WAVE && zombies.length===0 && bossesDefeatedInLevel>=5) { gameOver(true); return; }
-          updateGameLogic(1.0); logicAccumulator -= FIXED_STEP;
+      if(plant.type==="Potato" && plant.fuse!==undefined && plant.fuse<=0){
+        for(let i=zombies.length-1;i>=0;i--){
+          let z=zombies[i];
+          if(Math.abs(z.row-r)<=1 && Math.abs(z.x/CELL_W - c)<=1.3) zombies.splice(i,1);
         }
-        saveGameLocal();
-      }, 33);
+        grid[r][c]=null;
+        flashMsg("💥 腐败土豆雷殉爆","#ffaa55",500);
+      }
+      if(plant.type==="Cherry" && plant.cd<=0){
+        zombies = [];
+        flashMsg("🍒 血樱桃 · 虚无吞噬","#ff3300",700);
+        grid[r][c]=null;
+      }
     }
-
-    function updateGameLogic(timeFactor=1.0) {
+    // 子弹
+    for(let i=0;i<bullets.length;i++){
+      let b = bullets[i];
+      b.x += (b.type==="ice"? 9:13)*dt;
+      let hit=false;
+      for(let j=0;j<zombies.length;j++){
+        let z=zombies[j];
+        if(z.row===b.row && b.x+8 > z.x && b.x < z.x+CELL_W){
+          z.hp -= b.dmg;
+          if(b.type==="ice") z.slowTimer = 75;
+          if(z.hp<=0){
+            globalCurrency += z.reward || 12;
+            if(z.isBoss) bossesDefeated++;
+            zombies.splice(j,1);
+          }
+          hit=true; break;
+        }
+      }
+      if(hit || b.x>COLS*CELL_W+100){ bullets.splice(i,1); i--; }
+    }
+    // 僵尸移动 + 压迫力
+    for(let i=0;i<zombies.length;i++){
+      let z = zombies[i];
+      if(z.isFake){ z.x -= z.speed*dt; if(z.x< -60) zombies.splice(i,1); continue; }
+      if(z.special==="fear" && Math.random()<0.02*dt){
+        let col = Math.floor(z.x/CELL_W);
+        if(col>=0 && col<COLS && grid[z.row][col]){ grid[z.row][col]=null; flashMsg("😱 笑魇惊走植物","#ffaa77",700); showDreadText("心脏停跳一拍"); }
+      }
+      if(z.special==="convert" && Math.random()<0.024*dt){
+        let col = Math.floor(z.x/CELL_W);
+        if(col>=0 && col<COLS && grid[z.row][col]){ grid[z.row][col]=null; flashMsg("🎉 派对客腐化植物","#ff8844",700); }
+      }
+      let speedBonus = sanityMult;
+      let finalSpeed = (z.slowTimer>0 ? z.baseSpeed*0.5 : z.speed) * speedBonus;
+      if(z.slowTimer>0) z.slowTimer-=dt;
+      let move = finalSpeed * dt;
+      let colIdx = Math.floor(z.x/CELL_W);
+      if(colIdx>=0 && colIdx<COLS){
+        let tile = terrain[z.row][colIdx];
+        if(tile==='water') move*=0.55;
+        if(tile==='mud') move*=0.75;
+        if(tile==='rock') move*=0.92;
+      }
+      z.x -= move;
+      if(z.hp<=0){ zombies.splice(i,1); continue; }
+      let attackCol = Math.floor(z.x/CELL_W);
+      if(attackCol>=0 && attackCol<COLS && grid[z.row][attackCol]){
+        let defender = grid[z.row][attackCol];
+        let targetPlant = defender.type==="Pot" && defender.underPlant ? defender.underPlant : defender;
+        if(z.attackCd<=0){
+          let dmg = z.isBoss ? 3 : (z.type==="Giant"?2:1);
+          targetPlant.hp -= dmg;
+          z.attackCd = 32;
+          if(targetPlant.hp<=0){
+            if(defender.type==="Pot") grid[z.row][attackCol]=null;
+            else grid[z.row][attackCol]=null;
+            showDreadText("植物在尖叫中枯萎");
+          }
+        }
+      }
+      if(z.attackCd>0) z.attackCd-=dt;
+      if(z.x<12){ gameOver(false); return; }
+    }
+    // 杏仁水更低概率 (更煎熬)
+    if(Math.random()<0.0016 && almondWaters.length<3) almondWaters.push({x:20+Math.random()*(COLS*CELL_W-40),y:20+Math.random()*(ROWS*CELL_H-40),life:700});
+    // 阳光掉落收集
+    for(let i=0;i<sunDrops.length;i++){ sunDrops[i].y+=0.9*dt; if(sunDrops[i].life--<=0 || sunDrops[i].y>ROWS*CELL_H) sunDrops.splice(i,1); }
+    updateSanityWithAgony(dt);
+    // 屏幕震动衰减
+    if(terrorShake>0) terrorShake-=dt*0.8;
+    // 低理智红色覆盖
+    lowSanityOverlay = Math.min(0.55, (MAX_SANITY-sanity)/150);
+  }
+  
+  function spawnZombie(now){
+    if(zombies.filter(z=>!z.isFake).length>22) return;
+    let isBossWave = wave>=10 && bossesDefeated<3 && wave%12===0 && !zombies.some(z=>z.isBoss);
+    if(isBossWave){
+      let hp = 55 + currentLevel*2 + bossesDefeated*14;
+      zombies.push({ x:COLS*CELL_W, row:Math.floor(Math.random()*ROWS), hp:hp, maxHp:hp, type:"深渊扭曲体", color:"#ff5555", isBoss:true, baseSpeed:0.85, speed:0.85, reward:380+currentLevel*18, attackCd:0, slowTimer:0 });
+      bossesDefeated++;
+      flashMsg("⚠️ 深渊实体破壁 ⚠️","#ffaa55",1500);
+      return;
+    }
+    let roll = Math.random();
+    let baseType = "Normal";
+    if(currentLevel>20 && roll<0.45){ let keys = ["Smiler","Hound","Partygoer"]; baseType = keys[Math.floor(Math.random()*3)]; }
+    else if(roll<0.6) baseType="Normal";
+    else if(roll<0.8) baseType="Creeper";
+    else baseType="Giant";
+    let data = ENTITIES[baseType] || ENTITIES.Normal;
+    let bonusHp = Math.floor(currentLevel/3.5);
+    zombies.push({ x:COLS*CELL_W, row:Math.floor(Math.random()*ROWS), hp:data.hp+bonusHp, maxHp:data.hp+bonusHp, type:data.name||baseType, color:data.color, speed:data.speed, baseSpeed:data.speed, reward:data.reward+Math.floor(currentLevel/2.5), special:data.special || null, attackCd:0, slowTimer:0, isBoss:false, isFake:false });
+  }
+  
+  function gameOver(win){
+    if(gameState!=="PLAYING") return;
+    gameState="END"; clearInterval(updateInterval); updateInterval=null;
+    let bonus = Math.floor(sun/7);
+    globalCurrency += bonus;
+    if(win){
+      if(currentLevel>completedLevels) completedLevels = currentLevel;
+      flashMsg(`🏚️ 侥幸存活 Level ${currentLevel} ... 获得 ${bonus} 痛苦币`, "#ccaa88", 2500);
+    } else flashMsg(`💀 你被后室吞噬... 获得 ${bonus} 币, 但灵魂磨损`, "#ff7777", 2800);
+    saveGame(); updateUI();
+    showMenu();
+  }
+  
+  function startLevel(lv){
+    if(lv>TOTAL_LEVELS) return alert("没有尽头...你似乎永远困在这里");
+    currentLevel=lv; ROWS=getRows(lv); CELL_H = Math.min(130, Math.floor(850/ROWS));
+    canvas.height = ROWS*CELL_H;
+    terrain = genTerrain(lv, ROWS);
+    grid = Array(ROWS).fill().map(()=>Array(COLS).fill(null));
+    zombies = []; bullets = []; sunDrops = []; almondWaters = [];
+    wave = 1; sun = 160; bossesDefeated=0; sanity=100; insanityFlag=false; terrorShake=0;
+    $('sunAmount').innerText=sun;
+    updateUI();
+    gameScreen.style.display="block"; menuScreen.style.display="none"; gameState="PLAYING";
+    let now = performance.now(); lastWaveTime=now; lastSpawnTime=now; lastGameUpdate=now; logicAcc=0;
+    function renderLoop(){ if(gameState==="PLAYING") drawFrame(); animFrameId = requestAnimationFrame(renderLoop); }
+    renderLoop();
+    updateInterval = setInterval(()=>{
       if(gameState!=="PLAYING") return;
-      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-        let p=grid[r][c]; if(!p) continue;
-        if(terrain[r][c]==='lava'){ if(p.fireResistTime&&p.fireResistTime>0) p.fireResistTime-=timeFactor; else { if(p.type==="Pot"&&p.plant) p.plant.hp-=0.2*timeFactor; else p.hp-=0.2*timeFactor; if(p.hp<=0||(p.plant&&p.plant.hp<=0)) grid[r][c]=null; } continue; }
-        let actual=(p.type==="Pot"&&p.plant)?p.plant:p;
-        if(!actual||actual.hp<=0){ if(p.type==="Pot"&&p.plant&&p.plant.hp<=0)p.plant=null; else if(p.hp<=0)grid[r][c]=null; continue; }
-        if(actual.type==="Pea"&&(actual.cd||0)<=0&&zombies.some(z=>z.row===r&&z.x<COLS*CELL_W)){ bullets.push({x:c*CELL_W+80,y:r*CELL_H+50,row:r,type:"pea",damage:1+plantUpgrades.pea_damage}); actual.cd=Math.max(11,22-plantUpgrades.pea_speed*2); }
-        else if(actual.type==="Snow"&&(actual.cd||0)<=0&&zombies.some(z=>z.row===r&&z.x<COLS*CELL_W)){ bullets.push({x:c*CELL_W+80,y:r*CELL_H+50,row:r,type:"ice",damage:1}); actual.cd=26; }
-        else if(actual.type==="Sun"&&(actual.sunTimer||0)<=0){ let gain=25+plantUpgrades.sun_value*5; sun+=gain; sunDrops.push({x:c*CELL_W+50,y:r*CELL_H+30,life:55}); actual.sunTimer=180; sunAmountEl.innerText=Math.floor(sun); }
-        else if(actual.type==="Potato"&&actual.ready===undefined){ actual.ready=true; actual.fuse=85; }
-        else if(actual.type==="Potato"&&actual.fuse!==undefined&&actual.fuse<=0){ for(let i=zombies.length-1;i>=0;i--)if(Math.abs(zombies[i].row-r)<=1&&Math.abs(zombies[i].x/CELL_W-c)<=1)zombies.splice(i,1); grid[r][c]=null; }
-        else if(actual.type==="Cherry"&&(actual.cd||0)<=0){ zombies=[]; grid[r][c]=null; }
-        if(actual.cd>0)actual.cd-=timeFactor; if(actual.sunTimer>0)actual.sunTimer-=timeFactor; if(actual.fuse!==undefined&&actual.fuse>0)actual.fuse-=timeFactor;
+      let now2 = performance.now(), dt = Math.min(now2-lastGameUpdate, 120);
+      lastGameUpdate = now2; logicAcc += dt;
+      while(logicAcc >= FIXED_STEP){
+        let nowTick = performance.now();
+        if(nowTick - lastWaveTime >= 9500 + Math.random()*5500){
+          wave++; lastWaveTime = nowTick;
+          if(wave>WIN_WAVE) wave=WIN_WAVE;
+          if(wave%5===0) showDreadText(`第${wave}波 · 绝望逼近`);
+        }
+        let spawnDelay = Math.max(300, 1250 - currentLevel*1.5 - wave*2.5);
+        if(nowTick - lastSpawnTime >= spawnDelay && zombies.filter(z=>!z.isBoss).length<24){
+          spawnZombie(nowTick);
+          lastSpawnTime = nowTick;
+        }
+        if(wave>=WIN_WAVE && zombies.length===0){ gameOver(true); return; }
+        updateGameSim(1);
+        logicAcc -= FIXED_STEP;
       }
-      bullets.forEach(b=>b.x+=(b.type==="ice"?9:12)*timeFactor); bullets=bullets.filter(b=>b.x<COLS*CELL_W+60);
-      for(let i=bullets.length-1;i>=0;i--){ let hit=false; for(let j=zombies.length-1;j>=0;j--){ let z=zombies[j]; if(z.row===bullets[i].row&&bullets[i].x+10>z.x&&bullets[i].x<z.x+CELL_W){ z.hp-=bullets[i].damage; if(bullets[i].type==="ice")z.slowTimer=75; if(z.hp<=0){ if(z.isBoss){ globalCurrency+=z.reward; bossesDefeatedInLevel++; } zombies.splice(j,1); } bullets.splice(i,1); hit=true; break; } } if(hit)continue; }
-      for(let i=zombies.length-1;i>=0;i--){
-        let z=zombies[i], effSpeed=z.slowTimer>0?z.baseSpeed*0.5:z.speed;
-        if(z.slowTimer>0)z.slowTimer-=timeFactor;
-        let moveDist=effSpeed*timeFactor, colIdx=Math.floor(z.x/CELL_W);
-        if(colIdx>=0&&colIdx<COLS){ let tile=terrain[z.row][colIdx]; if(tile!=='rock')z.x-=moveDist*({water:0.55,ice:0.65,mud:0.75,mountain:0.75}[tile]||1); if(tile==='lava')z.hp-=0.03*timeFactor; }
-        else z.x-=moveDist;
-        if(z.hp<=0){ zombies.splice(i,1); continue; }
-        let atkCol=Math.floor(z.x/CELL_W);
-        if(atkCol>=0&&atkCol<COLS&&grid[z.row][atkCol]){ let target=grid[z.row][atkCol]; if(z.attackCd<=0){ let dmg=z.isBoss?2+(z.attackBonus||0):(z.type==="Giant"?2:1); if(target.type==="Pot"&&target.plant)target.plant.hp-=dmg; else target.hp-=dmg; z.attackCd=28; if((target.hp&&target.hp<=0)||(target.plant&&target.plant.hp<=0)) grid[z.row][atkCol]=null; } }
-        if(z.attackCd>0)z.attackCd-=timeFactor;
-        if(z.x<12){ gameOver(false); return; }
-      }
-      for(let i=0;i<ROWS;i++)if(screenShake[i]>0)screenShake[i]-=0.35*timeFactor;
-      for(let i=sunDrops.length-1;i>=0;i--){ sunDrops[i].y+=1.2*timeFactor; if(sunDrops[i].life--<=0||sunDrops[i].y>ROWS*CELL_H)sunDrops.splice(i,1); }
+    }, 33);
+  }
+  
+  // 绘图 (颤抖+暗角+低理智)
+  function drawFrame(){
+    ctx.save();
+    if(terrorShake>0){
+      let sx = (Math.random()-0.5)*terrorShake;
+      let sy = (Math.random()-0.5)*terrorShake;
+      ctx.translate(sx, sy);
     }
-
-    function draw(){
-      ctx.clearRect(0,0,gameCanvas.width,gameCanvas.height); let theme=getThemeForLevel(currentLevel);
-      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-        let type=terrain[r][c], x=c*CELL_W, y=r*CELL_H;
-        if(type==='grass'){ ctx.fillStyle=theme.mainGrass; ctx.fillRect(x,y,CELL_W,CELL_H); }
-        else if(type==='water'){ ctx.fillStyle="#2a6b8c"; ctx.fillRect(x,y,CELL_W,CELL_H); }
-        else if(type==='lava'){ ctx.fillStyle="#cc4400"; ctx.fillRect(x,y,CELL_W,CELL_H); }
-        else if(type==='rock'){ ctx.fillStyle="#5a5a5a"; ctx.fillRect(x,y,CELL_W,CELL_H); }
-        else if(type==='mud'){ ctx.fillStyle="#8b5a2b"; ctx.fillRect(x,y,CELL_W,CELL_H); }
-        else if(type==='ice'){ ctx.fillStyle="#aaddff"; ctx.fillRect(x,y,CELL_W,CELL_H); }
-        else if(type==='mountain'){ ctx.fillStyle="#6a6a5a"; ctx.fillRect(x,y,CELL_W,CELL_H); }
-      }
-      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-        let cell=grid[r][c]; if(!cell) continue; let x=c*CELL_W, y=r*CELL_H;
-        if(cell.type==="Pot"){ ctx.fillStyle="#c97e4a"; ctx.fillRect(x+28,y+28,44,64); if(cell.plant) drawPlant(ctx,x,y,cell.plant); }
-        else drawPlant(ctx,x,y,cell);
-      }
-      function drawPlant(ctx,x,y,p){
-        if(p.type==="Pea"){ ctx.fillStyle="#2f6b2f"; ctx.fillRect(x+15,y+40,70,55); }
-        else if(p.type==="Snow"){ ctx.fillStyle="#3c9fbf"; ctx.fillRect(x+15,y+40,70,55); }
-        else if(p.type==="Sun"){ ctx.fillStyle="#e5b813"; ctx.fillRect(x+15,y+45,70,42); }
-        else if(p.type==="Nut"){ ctx.fillStyle="#aa7c4a"; ctx.fillRect(x+28,y+28,44,64); }
-        else if(p.type==="Potato"){ ctx.fillStyle="#a56b2f"; ctx.fillRect(x+28,y+38,44,44); }
-        else if(p.type==="Cherry"){ ctx.fillStyle="#dd4444"; ctx.beginPath(); ctx.arc(x+50,y+58,22,0,Math.PI*2); ctx.fill(); }
-        else if(p.type==="TallNut"){ ctx.fillStyle="#c49a6c"; ctx.fillRect(x+28,y+16,44,84); }
-      }
-      sunDrops.forEach(d=>{ ctx.fillStyle="#ffdd44"; ctx.beginPath(); ctx.arc(d.x,d.y,8,0,Math.PI*2); ctx.fill(); });
-      bullets.forEach(b=>{ ctx.fillStyle=b.type==="ice"?"#88ddff":"#4caf50"; ctx.beginPath(); ctx.arc(b.x,b.y,5,0,Math.PI*2); ctx.fill(); });
-      zombies.forEach(z=>{
-        ctx.fillStyle=z.color; ctx.fillRect(z.x, z.row*CELL_H+CELL_H/2-15, CELL_W*0.5, 30);
-        if(z.isBoss){ ctx.fillStyle="#ffaa22"; ctx.font='10px "Courier New"'; ctx.fillText("BOSS",z.x+5,z.row*CELL_H+CELL_H/2-20); }
-      });
-      ctx.font='10px "Courier New"'; ctx.fillStyle="#fff3c9";
-      ctx.fillText(`关卡 ${currentLevel}/${TOTAL_LEVELS} · ${getThemeForLevel(currentLevel).name} · 波次 ${wave}/${WIN_WAVE}`,15,20);
-      ctx.fillStyle = getDaylightTint(currentLevel); ctx.fillRect(0,0,gameCanvas.width,gameCanvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let th = getTheme(currentLevel);
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      let x=c*CELL_W, y=r*CELL_H, t=terrain[r][c];
+      if(t==='grass') ctx.fillStyle=th.grass;
+      else if(t==='water') ctx.fillStyle="#1c4a66";
+      else if(t==='rock') ctx.fillStyle="#4a3a2a";
+      else ctx.fillStyle="#5a3a1a";
+      ctx.fillRect(x,y,CELL_W,CELL_H);
+      ctx.strokeStyle="#1e1408"; ctx.strokeRect(x,y,CELL_W,CELL_H);
     }
-
-    function gameOver(win){
-      if(gameState!=="PLAYING") return;
-      gameState="END"; if(updateInterval){clearInterval(updateInterval);updateInterval=null;}
-      let coinGain=convertSunToCurrency(sun);
-      alert(win?`🎉通关！获得${coinGain}游戏币`:`💀失败...获得${coinGain}游戏币`);
-      if(win&&currentLevel>completedLevels){ completedLevels=currentLevel; saveGameLocal(); }
-      updateCurrencyDisplay(); setTimeout(()=>showMenu(),1500);
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      let p = grid[r][c]; if(!p) continue;
+      let x=c*CELL_W, y=r*CELL_H;
+      let main = p.type==="Pot" && p.underPlant ? p.underPlant : p;
+      if(main.type==="Pea"){ ctx.fillStyle="#2f6b2f"; ctx.fillRect(x+10,y+30,70,55); ctx.fillStyle="#88aa44"; ctx.fillRect(x+38,y+43,14,14); }
+      else if(main.type==="Snow"){ ctx.fillStyle="#3f8aaa"; ctx.fillRect(x+10,y+30,70,55); }
+      else if(main.type==="Sun"){ ctx.fillStyle="#aa8844"; ctx.fillRect(x+12,y+35,65,48); ctx.fillStyle="#eebb55"; ctx.beginPath(); ctx.arc(x+45,y+58,10,0,Math.PI*2); ctx.fill(); }
+      else if(main.type==="Nut"){ ctx.fillStyle="#8a6a3a"; ctx.fillRect(x+28,y+28,44,64); }
+      else if(main.type==="TallNut"){ ctx.fillStyle="#9e7a4a"; ctx.fillRect(x+25,y+12,50,90); }
+      else if(main.type==="Potato"){ ctx.fillStyle="#8b5a2b"; ctx.fillRect(x+22,y+48,56,28); }
+      else if(main.type==="Cherry"){ ctx.fillStyle="#aa4444"; ctx.fillRect(x+20,y+42,60,42); }
+      else if(p.type==="Pot"){ ctx.fillStyle="#ae7a4a"; ctx.fillRect(x+12,y+52,76,18); if(p.underPlant)ctx.fillStyle="#88aa66"; ctx.fillRect(x+18,y+32,64,22); }
+      if(main.hp && main.maxHp){ ctx.fillStyle="#aa4422"; ctx.fillRect(x+8,y+5, (main.hp/main.maxHp)*80,5); }
     }
-
-    function showMenu(){
-      if(updateInterval){clearInterval(updateInterval);updateInterval=null;}
-      if(animFrameId){cancelAnimationFrame(animFrameId);animFrameId=null;}
-      gameState="MENU"; gameScreen.style.display="none"; stockModule.style.display="none"; menuScreen.style.display="block";
-      updateCurrencyDisplay(); renderMenuUpgradePanel(); applyLanguage(currentLang);
+    bullets.forEach(b=>{ ctx.fillStyle=b.type==="ice"?"#88ddff":"#aaee66"; ctx.beginPath(); ctx.arc(b.x,b.y,5,0,Math.PI*2); ctx.fill(); });
+    zombies.forEach(z=>{ ctx.fillStyle=z.color || "#b87c4a"; ctx.fillRect(z.x, z.row*CELL_H+CELL_H/2-22, CELL_W*0.55, 42); if(z.isBoss){ ctx.fillStyle="#ffaa66"; ctx.font="bold 13px monospace"; ctx.fillText("⚠️深渊⚠️",z.x+8,z.row*CELL_H+CELL_H/2-5); } });
+    sunDrops.forEach(s=>{ ctx.fillStyle="#ffcc66"; ctx.beginPath(); ctx.arc(s.x,s.y,9,0,Math.PI*2); ctx.fill(); });
+    almondWaters.forEach(a=>{ ctx.fillStyle="#44aaee"; ctx.beginPath(); ctx.arc(a.x,a.y,11,0,Math.PI*2); ctx.fill(); ctx.fillStyle="white"; ctx.fillText("💧",a.x-6,a.y+5); });
+    ctx.fillStyle="#eeddbb"; ctx.font="bold 12px monospace"; ctx.fillText(`[${th.name}] 波 ${wave}/${WIN_WAVE} 理智:${Math.floor(sanity)}`,12,18);
+    ctx.fillStyle="#3a1a0a"; ctx.fillRect(12,32,104,10); ctx.fillStyle="#ff8866"; ctx.fillRect(14,34,Math.min(100,sanity),6);
+    if(sanity<45){
+      ctx.globalAlpha=0.25 + (45-sanity)/150;
+      ctx.fillStyle="#aa0000"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.globalAlpha=1;
+      if(Math.random()<0.25){ let img=ctx.getImageData(0,0,canvas.width,canvas.height); for(let i=0;i<img.data.length;i+=4) img.data[i]+=Math.random()*40; ctx.putImageData(img,0,0); }
     }
-
-    function renderLevelList(){
-      if(!levelsContainer) return; levelsContainer.innerHTML="";
-      for(let i=1;i<=Math.min(completedLevels+1,TOTAL_LEVELS);i++){
-        let div=document.createElement("div"); div.className="level-card";
-        div.innerHTML=`<div>关卡 ${i}</div><div style="font-size:7px;">${getThemeForLevel(i).name}</div>`;
-        div.onclick=()=>{ levelsContainer.style.display="none"; startLevel(i); };
-        levelsContainer.appendChild(div);
-      }
+    if(lowSanityOverlay>0.05){
+      ctx.fillStyle=`rgba(80,0,0,${lowSanityOverlay*0.5})`;
+      ctx.fillRect(0,0,canvas.width,canvas.height);
     }
-
-    function renderMenuUpgradePanel(){
-      if(!menuUpgradePanel) return;
-      menuUpgradePanel.innerHTML = `
-        <button class="btn upgrade-btn" data-upgrade="pea_damage">🌱伤害+1 (100🪙)[${plantUpgrades.pea_damage}]</button>
-        <button class="btn upgrade-btn" data-upgrade="pea_speed">🌱攻速↑ (80🪙)[${plantUpgrades.pea_speed}]</button>
-        <button class="btn upgrade-btn" data-upgrade="sun_value">🌻阳光+5 (120🪙)[${plantUpgrades.sun_value}]</button>
-        <button class="btn upgrade-btn" data-upgrade="nut_hp">🥜HP+3 (90🪙)[${plantUpgrades.nut_hp}]</button>`;
-      menuUpgradePanel.querySelectorAll('.upgrade-btn').forEach(btn=>{ btn.onclick=()=>{ let id=btn.dataset.upgrade, cost={pea_damage:100,pea_speed:80,sun_value:120,nut_hp:90}[id]; if(applyUpgrade(id,cost)){ renderMenuUpgradePanel(); updateCurrencyDisplay(); } else alert("游戏币不足！"); }; });
+    ctx.restore();
+  }
+  
+  // 股票崩盘事件 (增加经济折磨)
+  function updateStockCrash(){
+    if(Math.random()<0.08 && gameState==="MENU"){
+      let lossMult = 0.65 + Math.random()*0.3;
+      for(let s of STOCKS) stockData.prices[s] = Math.max(8, stockData.prices[s]*lossMult);
+      flashMsg("📉 后室股灾! 资产蒸发! 📉","#ff8844",2000);
+      showDreadText("杏仁水市场崩盘，财富化为虚无");
+      saveGame();
+      if($('stockMarketPanel') && $('stockMarketPanel').style.display !== 'none') renderStockPanel();
     }
-
-    // ======================= 模拟股市 =======================
-    const REAL_STOCKS = [
-      { symbol:"600519",name:"贵州茅台",basePrice:1850,volatility:0.018 },{ symbol:"000858",name:"五粮液",basePrice:162,volatility:0.022 },
-      { symbol:"300750",name:"宁德时代",basePrice:210,volatility:0.032 },{ symbol:"002594",name:"比亚迪",basePrice:268,volatility:0.028 },
-      { symbol:"601318",name:"中国平安",basePrice:48,volatility:0.020 },{ symbol:"000333",name:"美的集团",basePrice:62,volatility:0.025 },
-      { symbol:"600036",name:"招商银行",basePrice:39,volatility:0.019 },{ symbol:"002415",name:"海康威视",basePrice:36,volatility:0.026 },
-      { symbol:"300059",name:"东方财富",basePrice:18,volatility:0.038 },{ symbol:"601012",name:"隆基绿能",basePrice:28,volatility:0.035 },
-      { symbol:"600276",name:"恒瑞医药",basePrice:48,volatility:0.024 },{ symbol:"000651",name:"格力电器",basePrice:36,volatility:0.022 },
-      { symbol:"002475",name:"立讯精密",basePrice:32,volatility:0.030 },{ symbol:"600900",name:"长江电力",basePrice:24,volatility:0.015 },
-      { symbol:"300124",name:"汇川技术",basePrice:66,volatility:0.028 },{ symbol:"601899",name:"紫金矿业",basePrice:12,volatility:0.033 },
-      { symbol:"600809",name:"山西汾酒",basePrice:280,volatility:0.027 },{ symbol:"000568",name:"泸州老窖",basePrice:230,volatility:0.026 },
-      { symbol:"002714",name:"牧原股份",basePrice:48,volatility:0.031 },{ symbol:"300274",name:"阳光电源",basePrice:98,volatility:0.040 }
-    ];
-    let stockList=[], coinPositions={}, marginAccount={debt:0,interestRate:0.0004}, marketWave=0, assetHistory=[], stockUpdateTimer=null, equityChart=null, selectedStockSymbol=null;
-
-    function initStockModule(){
-      if(stockList.length===0){ REAL_STOCKS.forEach(s=>{ stockList.push({ symbol:s.symbol, name:s.name, price:s.basePrice, basePrice:s.basePrice, volatility:s.volatility, history:[s.basePrice], change:0, changePercent:0, preClose:s.basePrice }); }); }
-      if(Object.keys(coinPositions).length===0) REAL_STOCKS.forEach(s=>coinPositions[s.symbol]=0);
-      if(assetHistory.length===0) assetHistory.push({time:Date.now(),value:getTotalAssetValue()});
-      selectedStockSymbol=stockList[0].symbol; renderStockUI();
-      if(stockUpdateTimer)clearInterval(stockUpdateTimer); stockUpdateTimer=setInterval(updateStockPrices,3000);
+  }
+  function renderStockPanel(){
+    let panel = $('stockMarketPanel'); if(!panel) return;
+    let totalValue = globalCurrency; for(let s of STOCKS) totalValue += (stockData.holdings[s]||0)*(stockData.prices[s]||50);
+    panel.innerHTML = `<div class="stock-header"><span>📉 后室绝望交易所</span><span>残值: ${Math.floor(totalValue)} 🪙</span><button id="closeStockBtn" class="btn">❌ 关闭</button></div><div class="stock-grid" id="stockGrid"></div><div class="tip">⚠️ 随机崩盘机制，你的任何储蓄都可能蒸发</div><canvas id="equityMiniChart" height="70"></canvas>`;
+    let gridDiv = $('#stockGrid'); gridDiv.innerHTML='';
+    STOCKS.forEach(sym=>{
+      let price = stockData.prices[sym]; let hold = stockData.holdings[sym]||0;
+      let card = document.createElement('div'); card.className='stock-card'; card.style.background='#141d2e';
+      card.innerHTML = `<h4>${sym}</h4><div>📉 ${price.toFixed(2)}</div><div>持仓: ${hold}</div><input id="qty_${sym}" type="number" value="1" class="trade-input" style="width:70px;"><div><button class="btn btn-buy" data-stock="${sym}" data-op="buy">绝望买入</button><button class="btn btn-sell" data-stock="${sym}" data-op="sell">割肉卖出</button></div>`;
+      gridDiv.appendChild(card);
+    });
+    document.querySelectorAll('[data-op="buy"]').forEach(btn=>btn.onclick=()=>{
+      let sym=btn.dataset.stock; let qty=parseInt($(`#qty_${sym}`).value)||1; let cost=qty*stockData.prices[sym];
+      if(globalCurrency>=cost){ globalCurrency-=cost; stockData.holdings[sym]=(stockData.holdings[sym]||0)+qty; flashMsg(`买入了 ${sym} ×${qty} 但恐惧不减`,"#aaaaff",1000); updateUI(); saveGame(); renderStockPanel(); }
+      else flashMsg("连买惨的币都不够了","#ff8888",800);
+    });
+    document.querySelectorAll('[data-op="sell"]').forEach(btn=>btn.onclick=()=>{
+      let sym=btn.dataset.stock; let qty=parseInt($(`#qty_${sym}`).value)||1; let hold=stockData.holdings[sym]||0;
+      if(hold>=qty){ let earn=qty*stockData.prices[sym]; globalCurrency+=earn; stockData.holdings[sym]-=qty; flashMsg(`绝望抛售 ${sym} ，获得微薄币`,"#88ffaa",900); updateUI(); saveGame(); renderStockPanel(); }
+      else flashMsg("持仓不足","#ff8888",600);
+    });
+    $('#closeStockBtn').onclick=()=>{ panel.style.display='none'; };
+    if(stockData.history.length){
+      let ctx2=document.getElementById('equityMiniChart')?.getContext('2d'); if(ctx2) new Chart(ctx2,{type:'line',data:{labels:stockData.history.map((_,i)=>i),datasets:[{label:'资产',data:stockData.history,borderColor:'#ff6644',borderWidth:2,fill:false,tension:0.3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}}}});
     }
-    function updateStockPrices(){
-      marketWave+=0.06; let bias=Math.sin(marketWave)*0.006;
-      stockList.forEach(s=>{ let changePct=(Math.random()-0.5)*2*s.volatility+bias, newPrice=s.price*(1+changePct); newPrice=Math.min(s.preClose*1.1,Math.max(s.preClose*0.9,newPrice)); s.price=Math.round(newPrice*100)/100; s.change=Math.round((s.price-s.preClose)*100)/100; s.changePercent=Math.round((s.change/s.preClose)*10000)/100; s.history.push(s.price); if(s.history.length>200)s.history.shift(); });
-      marginAccount.debt*=1+marginAccount.interestRate; marginAccount.debt=Math.round(marginAccount.debt*100)/100;
-      assetHistory.push({time:Date.now(),value:getTotalAssetValue()}); if(assetHistory.length>300)assetHistory.shift();
-      refreshStockDisplay(); updateEquityChart();
-    }
-    function getTotalAssetValue(){ let v=0; stockList.forEach(s=>v+=(coinPositions[s.symbol]||0)*s.price); return globalCurrency+v-marginAccount.debt; }
-    function renderStockUI(){
-      let sv=0; stockList.forEach(s=>sv+=(coinPositions[s.symbol]||0)*s.price); let ta=getTotalAssetValue();
-      stockModule.innerHTML=`
-        <div style="display:flex;justify-content:space-between;margin-bottom:12px;"><h2 style="font-size:13px;color:#ffcc44;">📈 模拟股市</h2><button class="btn" id="backToMenuFromStock">🏠 返回菜单</button></div>
-        <div class="asset-summary"><div>💰现金:<b>${Math.floor(globalCurrency)}</b>🪙</div><div>📦市值:<b>${Math.floor(sv)}</b>🪙</div><div>🏦总资产:<b>${Math.floor(ta)}</b>🪙</div><div style="color:${marginAccount.debt>0?'#f66':'#8c8'}">💳债务:<b>${marginAccount.debt.toFixed(1)}</b>🪙</div></div>
-        <div class="stock-disclaimer">⚠️ 免责声明：本模块仅为游戏内虚拟数值演算，与任何证券交易所、金融机构均无关联。严禁将本页面数据用于真实证券投资。</div>
-        <div class="stock-grid"><div class="stock-card"><h3>模拟A股</h3><table class="stock-table"><thead><tr><th>代码</th><th>价格</th><th>涨跌</th><th>持仓</th></tr></thead><tbody id="stockTableBody"></tbody></table>
-        <div style="margin-top:10px;display:flex;gap:6px;"><span style="font-size:8px;">选中:<b id="selectedStockLabel">${selectedStockSymbol||'-'}</b></span><input type="number" id="tradeQty" class="trade-input" value="10" style="width:70px;"><button class="btn btn-buy" id="btnBuy">买入</button><button class="btn btn-sell" id="btnSell">卖出</button></div></div>
-        <div class="stock-card"><h3>持仓</h3><div id="positionsList"></div><hr style="border-color:#233554;margin:8px 0;"><h3>融资</h3><div style="display:flex;gap:6px;"><input type="number" id="marginAmount" class="trade-input" value="500" style="width:80px;"><button class="btn btn-margin" id="btnBorrow">借入</button><button class="btn btn-repay" id="btnRepay">偿还</button></div><div style="font-size:7px;margin-top:6px;color:#aac;">利率:${(marginAccount.interestRate*100).toFixed(2)}%/周期</div></div></div>
-        <div class="chart-container"><canvas id="equityChartCanvas"></canvas></div>`;
-      refreshStockDisplay();
-      document.getElementById('backToMenuFromStock').onclick=()=>{ if(stockUpdateTimer)clearInterval(stockUpdateTimer); stockModule.style.display="none"; menuScreen.style.display="block"; updateCurrencyDisplay(); };
-      document.getElementById('btnBuy').onclick=()=>tradeStock('buy'); document.getElementById('btnSell').onclick=()=>tradeStock('sell');
-      document.getElementById('btnBorrow').onclick=()=>{ let a=parseFloat(document.getElementById('marginAmount')?.value)||0; if(a>0&&a<=50000){ marginAccount.debt+=a; globalCurrency+=a; refreshStockDisplay(); updateCurrencyDisplay(); } };
-      document.getElementById('btnRepay').onclick=()=>{ let a=parseFloat(document.getElementById('marginAmount')?.value)||0; if(a>marginAccount.debt)a=marginAccount.debt; if(a>0&&globalCurrency>=a){ globalCurrency-=a; marginAccount.debt-=a; refreshStockDisplay(); updateCurrencyDisplay(); } };
-      updateEquityChart();
-    }
-    function refreshStockDisplay(){
-      let tb=document.getElementById('stockTableBody'); if(!tb) return;
-      tb.innerHTML=stockList.map(s=>{ let cls=s.change>=0?'up':'down'; return `<tr class="${selectedStockSymbol===s.symbol?'sel-row':''}" data-sym="${s.symbol}"><td>${s.symbol}<br><span style="font-size:7px;color:#aaa;">${s.name}</span></td><td>${s.price.toFixed(2)}</td><td class="${cls}">${s.change>=0?'▲':'▼'}${Math.abs(s.changePercent).toFixed(2)}%</td><td>${coinPositions[s.symbol]||0}</td></tr>`; }).join('');
-      tb.querySelectorAll('tr').forEach(r=>r.onclick=()=>{ selectedStockSymbol=r.dataset.sym; refreshStockDisplay(); });
-      let pd=document.getElementById('positionsList'); if(pd){ let hp=false; pd.innerHTML=stockList.filter(s=>(coinPositions[s.symbol]||0)>0).map(s=>{hp=true;return`<div class="position-item"><span>${s.symbol}</span><span>${coinPositions[s.symbol]}股</span></div>`;}).join('')||'暂无持仓'; }
-    }
-    function tradeStock(action){
-      if(!selectedStockSymbol){alert("请先选一只股票");return;} let q=parseInt(document.getElementById('tradeQty')?.value)||0; if(q<=0)return; let s=stockList.find(x=>x.symbol===selectedStockSymbol); if(!s)return; let cost=s.price*q, comm=Math.max(5,cost*0.00025);
-      if(action==='buy'){ if(globalCurrency>=cost+comm){ globalCurrency-=cost+comm; coinPositions[s.symbol]=(coinPositions[s.symbol]||0)+q; saveCurrencyAndUpgrades(); refreshStockDisplay(); updateCurrencyDisplay(); } else alert("现金不足"); }
-      else{ let h=coinPositions[s.symbol]||0; if(h>=q){ globalCurrency+=cost-comm-cost*0.001; coinPositions[s.symbol]=h-q; saveCurrencyAndUpgrades(); refreshStockDisplay(); updateCurrencyDisplay(); } else alert("持仓不足"); }
-      updateEquityChart();
-    }
-    function updateEquityChart(){
-      let c=document.getElementById('equityChartCanvas'); if(!c||assetHistory.length<2)return; if(equityChart)equityChart.destroy();
-      equityChart=new Chart(c,{type:'line',data:{labels:assetHistory.slice(-60).map(a=>new Date(a.time).toLocaleTimeString()),datasets:[{label:'总资产',data:assetHistory.slice(-60).map(a=>Math.floor(a.value)),borderColor:'#00d2d3',fill:true,tension:0.3,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888',font:{size:7}}},y:{ticks:{color:'#888',callback:v=>Math.floor(v)+'🪙'}}}}});
-    }
-
-    // ======================= 事件绑定 =======================
-    function bindAllEvents(){
-      document.querySelectorAll("#plantButtons .btn[data-plant]").forEach(btn=>{ btn.onclick=()=>{ document.querySelectorAll("#plantButtons .btn[data-plant]").forEach(b=>b.classList.remove("sel")); btn.classList.add("sel"); selectedPlant=btn.dataset.plant; }; });
-      document.getElementById('showUpgradeBtn').onclick=()=>{ upgradePanel.style.display=upgradePanel.style.display==="none"?"flex":"none"; };
-      upgradePanel.querySelectorAll('.upgrade-btn').forEach(btn=>{ btn.onclick=()=>{ let id=btn.dataset.upgrade, cost={pea_damage:100,pea_speed:80,sun_value:120,nut_hp:90}[id]; if(applyUpgrade(id,cost)){ renderMenuUpgradePanel(); updateCurrencyDisplay(); } else alert("游戏币不足！"); }; });
-      document.getElementById('backToMenuFromGame').onclick=()=>{ if(gameState==="PLAYING"){ convertSunToCurrency(sun); sun=150; } showMenu(); };
-      document.getElementById('manualExportBtn').onclick=()=>{ if(!currentGameUser)return; let blob=new Blob([JSON.stringify({user:currentGameUser,level:currentLevel,wave,sun,currency:globalCurrency,upgrades:plantUpgrades,completedLevels})],{type:"application/json"}); let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`CDBR_${currentGameUser}.json`; a.click(); };
-      gameCanvas.addEventListener("click",(e)=>{
-        if(gameState!=="PLAYING")return; let rect=gameCanvas.getBoundingClientRect(),sx=gameCanvas.width/rect.width,sy=gameCanvas.height/rect.height; let cx=(e.clientX-rect.left)*sx, cy=(e.clientY-rect.top)*sy; let col=Math.floor(cx/CELL_W),row=Math.floor(cy/CELL_H); if(row>=ROWS||col>=COLS)return;
-        for(let i=sunDrops.length-1;i>=0;i--)if(Math.hypot(sunDrops[i].x-cx,sunDrops[i].y-cy)<25){ sun+=25; sunDrops.splice(i,1); sunAmountEl.innerText=Math.floor(sun); return; }
-        let cost=PLANT_COST[selectedPlant]||0;
-        if(sun>=cost&&!grid[row][col]&&terrain[row][col]!=='rock'){ sun-=cost; sunAmountEl.innerText=sun; let hpVal=PLANT_HP[selectedPlant]; if(selectedPlant==="Nut")hpVal=6+plantUpgrades.nut_hp; if(selectedPlant==="TallNut")hpVal=12+plantUpgrades.nut_hp; grid[row][col]={type:selectedPlant,hp:hpVal,maxHp:hpVal,cd:0,sunTimer:(selectedPlant==="Sun"?20:0)}; }
-      });
-      document.getElementById('startGameBtn').onclick=()=>{ levelsContainer.style.display="flex"; renderLevelList(); };
-      document.getElementById('openStockBtn').onclick=()=>{ menuScreen.style.display="none"; stockModule.style.display="block"; initStockModule(); };
-      document.getElementById('menuUpgradeBtn').onclick=()=>{ menuUpgradePanel.style.display=menuUpgradePanel.style.display==="none"?"flex":"none"; renderMenuUpgradePanel(); };
-    }
-
-    function login(username){
-      if(!username.trim()){ loginErrorEl.innerText="用户名不能为空"; return false; }
-      currentGameUser=username.trim(); loadGameLocal(); loadCurrencyAndUpgrades(); updateCurrencyDisplay();
-      loginScreen.style.display="none"; menuScreen.style.display="block"; bindAllEvents(); renderMenuUpgradePanel(); menuUpgradePanel.style.display="none"; applyLanguage(currentLang); return true;
-    }
-    document.getElementById('loginBtn').onclick=()=>login(document.getElementById('username').value);
-    document.getElementById('username').addEventListener('keydown',e=>{ if(e.key==='Enter')login(document.getElementById('username').value); });
-    updateCurrencyDisplay();
-})();
-</script>
-
-<!-- PWA 注册 -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('✅ PWA 已激活', reg.scope))
-        .catch(err => console.log('⚠️ SW 注册失败', err));
+  }
+  
+  function showMenu(){
+    if(updateInterval)clearInterval(updateInterval); if(animFrameId)cancelAnimationFrame(animFrameId);
+    gameState="MENU"; gameScreen.style.display="none"; menuScreen.style.display="block";
+    updateUI(); $('menuUpgradePanel').style.display="none"; $('levelsContainer').style.display="none"; $('stockMarketPanel').style.display="none";
+  }
+  function buildUpgradePanel(container){
+    let upgrades = [{id:"pea_damage",label:"🌱豌豆腐蚀+1",cost:110,desc:plantUpgrades.pea_damage},{id:"pea_speed",label:"🌱射击焦虑下降",cost:85,desc:plantUpgrades.pea_speed},{id:"sun_value",label:"🌻枯葵产量+5",cost:130,desc:plantUpgrades.sun_value},{id:"nut_hp",label:"🥜腐朽坚果HP+5",cost:95,desc:plantUpgrades.nut_hp}];
+    container.innerHTML = upgrades.map(u=>`<button class="btn upgrade-btn" data-up="${u.id}">${u.label} (${u.cost}🪙) 等级${u.desc}</button>`).join('');
+    container.querySelectorAll('[data-up]').forEach(btn=>btn.onclick=()=>{
+      let up=btn.dataset.up; let cost={pea_damage:110,pea_speed:85,sun_value:130,nut_hp:95}[up];
+      if(globalCurrency>=cost){ globalCurrency-=cost; plantUpgrades[up]++; updateUI(); saveGame(); buildUpgradePanel(container); flashMsg(`升级成功，暂时苟且 ${up} Lv${plantUpgrades[up]}`,"#aaffaa",900); }
+      else flashMsg("连苟活的币都没有了","#ff8888",700);
     });
   }
+  
+  $('loginBtn').onclick=()=>{ let name=$('username').value.trim(); if(!name){ $('loginError').innerText="名字不能为空，不然连墓碑都没有"; return; } currentGameUser=name; loadGame(); updateUI(); loginScreen.style.display="none"; menuScreen.style.display="block"; };
+  $('startGameBtn').onclick=()=>{ let cont=$('levelsContainer'); cont.style.display="flex"; cont.innerHTML=""; for(let i=1;i<=Math.min(completedLevels+1,TOTAL_LEVELS);i++){ let d=document.createElement('div'); d.className="level-card"; d.innerHTML=`Level ${i}<br><small style="color:#dd9966">${getTheme(i).name}</small>`; d.onclick=()=>{ cont.style.display="none"; startLevel(i); }; cont.appendChild(d); } };
+  $('menuUpgradeBtn').onclick=()=>{ let p=$('menuUpgradePanel'); p.style.display=p.style.display==="none"?"flex":"none"; buildUpgradePanel(p); };
+  $('stockTradeBtn').onclick=()=>{ let panel=$('stockMarketPanel'); panel.style.display="block"; renderStockPanel(); updateStockCrash(); };
+  $('backToMenuBtn').onclick=()=>{ clearInterval(updateInterval); cancelAnimationFrame(animFrameId); showMenu(); };
+  $('showUpgradeBtn').onclick=()=>{ let p=$('upgradePanel'); p.style.display=p.style.display==="none"?"flex":"none"; if(p.children.length===0) buildUpgradePanel(p); };
+  canvas.addEventListener("click",(e)=>{
+    if(gameState!=="PLAYING") return;
+    let rect=canvas.getBoundingClientRect(), sx=canvas.width/rect.width, sy=canvas.height/rect.height;
+    let cx=(e.clientX-rect.left)*sx, cy=(e.clientY-rect.top)*sy;
+    for(let i=0;i<almondWaters.length;i++) if(Math.hypot(almondWaters[i].x-cx,almondWaters[i].y-cy)<18){ sanity=Math.min(100,sanity+18); almondWaters.splice(i,1); flashMsg("💧 杏仁水苦涩但救赎理智","#77aaff",1000); showDreadText("短暂的清明..."); return; }
+    for(let i=0;i<sunDrops.length;i++) if(Math.hypot(sunDrops[i].x-cx,sunDrops[i].y-cy)<18){ sun+=22; sunDrops.splice(i,1); $('sunAmount').innerText=Math.floor(sun); return; }
+    let col=Math.floor(cx/CELL_W), row=Math.floor(cy/CELL_H); if(row>=ROWS||col>=COLS) return;
+    let cost = {Pea:50,Snow:75,Sun:50,Nut:70,Pot:45,Potato:35,Cherry:150,TallNut:110}[selectedPlant]||50;
+    if(sun>=cost && !grid[row][col] && terrain[row][col]!=='rock'){
+      sun-=cost; $('sunAmount').innerText=Math.floor(sun);
+      let maxHp = {Pea:3,Snow:3,Sun:3,Nut:6+plantUpgrades.nut_hp,Pot:6,Potato:1,Cherry:1,TallNut:14+plantUpgrades.nut_hp}[selectedPlant]||3;
+      let plantObj = {type:selectedPlant, hp:maxHp, maxHp:maxHp, cd:0, sunTimer:selectedPlant==="Sun"?20:0, fuse:selectedPlant==="Potato"?140:0};
+      if(selectedPlant==="Pot") grid[row][col] = {type:"Pot", hp:8, maxHp:8, underPlant:null, bonusHp:10};
+      else grid[row][col] = plantObj;
+    }
+  });
+  document.querySelectorAll("#plantButtons .btn[data-plant]").forEach(b=>b.onclick=()=>{ document.querySelectorAll("#plantButtons .btn").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); selectedPlant=b.dataset.plant; });
+  setInterval(()=>{ if(gameState==="MENU") updateStockCrash(); }, 22000);
+})();
 </script>
 </body>
 </html>
