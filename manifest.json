@@ -1,0 +1,21 @@
+{
+  "name": "后室塔防",
+  "short_name": "后室TD",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a2a1a",
+  "theme_color": "#0a2a1a",
+  "description": "600关后室主题塔防，理智系统，离线可玩",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
